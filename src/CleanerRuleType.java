@@ -1,3 +1,3 @@
 public enum CleanerRuleType {
-    DeleteLine, DeletePhrase
+    DeleteLineWithPhrase, DeletePhrase
 }
