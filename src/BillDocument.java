@@ -47,7 +47,7 @@ public class BillDocument {
         String secondHalfLine = billDocumentLines.get(lineOfWordNumber + 1);
 
         int firstHalfPositionStart = firstHalfLine.lastIndexOf(" ") + 1;
-        int firstHalfPositionFinish = firstHalfLine.length() - 2;
+        int firstHalfPositionFinish = firstHalfLine.length() - 1;
 
         String newFirstLine;
         String newSecondLine;

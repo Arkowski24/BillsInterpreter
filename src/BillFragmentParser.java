@@ -12,4 +12,5 @@ public class BillFragmentParser {
         BillFragment billFragment = new BillFragment();
         return billFragment;
     }
+
 }
