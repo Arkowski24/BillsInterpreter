@@ -1,41 +1,31 @@
 import java.util.List;
 
 public class BillFragment {
-    private String fragmentTitle;
     private String fragmentContent;
-
-    private BillFragment superBillFragment;
-    private List<BillFragment> subBillFragments;
-
-    public String getFragmentTitle() {
-        return fragmentTitle;
-    }
-
-    public void setFragmentTitle(String fragmentTitle) {
-        this.fragmentTitle = fragmentTitle;
-    }
+    private BillFragment parentBillFragment;
+    private List<BillFragment> childrenBillFragments;
 
     public String getFragmentContent() {
         return fragmentContent;
     }
 
+    public BillFragment getParentBillFragment() {
+        return parentBillFragment;
+    }
+
+    public void setParentBillFragment(BillFragment parentBillFragment) {
+        this.parentBillFragment = parentBillFragment;
+    }
+
+    public List<BillFragment> getChildrenBillFragments() {
+        return childrenBillFragments;
+    }
+
+    public void setChildrenBillFragments(List<BillFragment> childrenBillFragments) {
+        this.childrenBillFragments = childrenBillFragments;
+    }
+
     public void setFragmentContent(String fragmentContent) {
         this.fragmentContent = fragmentContent;
-    }
-
-    public BillFragment getSuperBillFragment() {
-        return superBillFragment;
-    }
-
-    public void setSuperBillFragment(BillFragment superBillFragment) {
-        this.superBillFragment = superBillFragment;
-    }
-
-    public List<BillFragment> getSubBillFragments() {
-        return subBillFragments;
-    }
-
-    public void setSubBillFragments(List<BillFragment> subBillFragments) {
-        this.subBillFragments = subBillFragments;
     }
 }
