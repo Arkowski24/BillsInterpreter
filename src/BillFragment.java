@@ -1,31 +1,55 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class BillFragment {
-    private String fragmentContent;
-    private BillFragment parentBillFragment;
-    private List<BillFragment> childrenBillFragments;
+    private String identifier;
+    private String content;
+    private BillFragment parent;
+    private List<BillFragment> children;
 
-    public String getFragmentContent() {
-        return fragmentContent;
+
+    public BillFragment() {
+        this.children = new ArrayList<>();
     }
 
-    public BillFragment getParentBillFragment() {
-        return parentBillFragment;
+    public String getIdentifier() {
+        return identifier;
     }
 
-    public void setParentBillFragment(BillFragment parentBillFragment) {
-        this.parentBillFragment = parentBillFragment;
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
-    public List<BillFragment> getChildrenBillFragments() {
-        return childrenBillFragments;
+    public String getContent() {
+        return content;
     }
 
-    public void setChildrenBillFragments(List<BillFragment> childrenBillFragments) {
-        this.childrenBillFragments = childrenBillFragments;
+    public BillFragment getParent() {
+        return parent;
     }
 
-    public void setFragmentContent(String fragmentContent) {
-        this.fragmentContent = fragmentContent;
+    public void setParent(BillFragment parent) {
+        this.parent = parent;
+    }
+
+    public List<BillFragment> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<BillFragment> children) {
+        this.children = children;
+    }
+
+    public void addChild(BillFragment billFragment){
+        children.add(billFragment);
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    @Override
+    public String toString() {
+        return identifier + content;
     }
 }

@@ -1,10 +1,17 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class BillDocument {
     private List<String> billDocumentLines;
+    private BillFragment billFragment;
+
+    public BillFragment getBillFragment() {
+        return billFragment;
+    }
+
+    public void setBillFragment(BillFragment billFragment) {
+        this.billFragment = billFragment;
+    }
 
     public BillDocument(){
         billDocumentLines = new ArrayList<>();

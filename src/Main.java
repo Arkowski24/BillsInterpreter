@@ -19,6 +19,11 @@ public class Main {
         cleaner.addNewCleanRule(new CleanerRule("^[0-9]$", CleanerRuleType.DeleteLineWithPhrase));
 
         cleaner.clearDocument(billDocument);
-        billDocument.connectBrokenWords();
+        cleaner.connectBrokenWords(billDocument);
+
+        Parser parser = new Parser();
+        parser.addParserRule(new ParserRule("Art.\\s[0-9]{2}", ParserRuleType.Multiple));
+
+        parser.parseDocument(billDocument);
     }
 }
