@@ -84,12 +84,14 @@ public class Parser {
 
     private BillFragmentWithRules getNextFragment(String content, List<ParserMatcher> matchers){
         int identifierStartPosition = Integer.MAX_VALUE;
+        int secondLowestIdentifier = Integer.MAX_VALUE;
         ParserMatcher choosenMatcher = null;
 
         for (ParserMatcher parserMatcher : matchers){
             if (parserMatcher.availability) {
                 int parserEndPosition = parserMatcher.matcher.start();
                 if (parserEndPosition < identifierStartPosition) {
+                    secondLowestIdentifier = identifierStartPosition;
                     identifierStartPosition = parserEndPosition;
                     choosenMatcher = parserMatcher;
                 }
@@ -101,15 +103,28 @@ public class Parser {
         }
 
         int identifierEndPosition = choosenMatcher.matcher.end();
-        String newBillFragmentIdentifier = content.substring(identifierStartPosition, identifierEndPosition);
-        String newBillFragmentContent = content.substring(identifierEndPosition + 1, content.length());
+        choosenMatcher.availability = choosenMatcher.matcher.find();
+        if (choosenMatcher.availability){
+            int newMatchPos = choosenMatcher.matcher.start();
+            if (newMatchPos < secondLowestIdentifier) {
+                secondLowestIdentifier = newMatchPos;
+            }
+        }
 
+        List<ParserRule> newBillRules = choosenMatcher.rule.subRules;
         BillFragment newBillFragment = new BillFragment();
+        String newBillFragmentIdentifier = content.substring(identifierStartPosition, identifierEndPosition);
+        String newBillFragmentContent;
+
+        if (secondLowestIdentifier == Integer.MAX_VALUE){
+            newBillFragmentContent = content.substring(identifierEndPosition + 1, content.length());
+        }
+        else{
+            newBillFragmentContent = content.substring(identifierEndPosition + 1, secondLowestIdentifier);
+        }
+
         newBillFragment.setIdentifier(newBillFragmentIdentifier);
         newBillFragment.setContent(newBillFragmentContent);
-        List<ParserRule> newBillRules = choosenMatcher.rule.subRules;
-
-        choosenMatcher.availability = choosenMatcher.matcher.find();
 
         return new BillFragmentWithRules(newBillFragment, newBillRules);
     }
