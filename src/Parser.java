@@ -5,34 +5,34 @@ import java.util.regex.Matcher;
 public class Parser {
     private List<ParserRule> billParserRules;
 
-    public Parser(){
+    public Parser() {
         billParserRules = new ArrayList<>();
     }
 
-    public void addParserRule(ParserRule parserRule){
+    public void addParserRule(ParserRule parserRule) {
         billParserRules.add(parserRule);
     }
 
-    public void parseDocument(BillDocument billDocument){
+    public void parseDocument(BillDocument billDocument) {
         List<String> lines = billDocument.getBillDocumentLines();
         BillFragment billFragment = new BillFragment();
 
         String content = "";
-        for (String billLine : lines){
+        for (String billLine : lines) {
             content += billLine + "\n";
         }
 
         billFragment.setParent(null);
         billFragment.setContent(content);
 
-        parseFragment(new BillFragmentWithRules(billFragment, billParserRules));
+        parseFragment(new BillFragmentWithRules(billFragment, billParserRules, 0));
 
         billDocument.setBillFragment(billFragment);
     }
 
-    private void parseFragment(BillFragmentWithRules parent){
+    private void parseFragment(BillFragmentWithRules parent) {
         if (parent == null || parent.billFragment == null
-                || parent.parserRules == null){
+                || parent.parserRules == null) {
             return;
         }
 
@@ -40,96 +40,99 @@ public class Parser {
         if (children == null)
             return;
 
-        for (BillFragmentWithRules child : children){
+        for (BillFragmentWithRules child : children) {
             child.billFragment.setParent(parent.billFragment);
             parent.billFragment.addChild(child.billFragment);
             parseFragment(child);
         }
     }
 
-    private List<BillFragmentWithRules> getFragments(BillFragmentWithRules parent){
-        BillFragment billFragment = parent.billFragment;
-        List<ParserRule> parserRules = parent.parserRules;
-
-        String content = billFragment.getContent();
+    private List<BillFragmentWithRules> getFragments(BillFragmentWithRules parent) {
+        //Create matcher for given content using patterns from rules
+        String content = parent.billFragment.getContent();
         List<ParserMatcher> matchers = new ArrayList<>();
-
-        for (ParserRule parserRule : parserRules){
+        for (ParserRule parserRule : parent.parserRules) {
             Matcher matcher = parserRule.pattern.matcher(content);
-            matchers.add(new ParserMatcher(matcher, parserRule, true));
+            matchers.add(new ParserMatcher(matcher, parserRule));
         }
 
-        for (ParserMatcher matcher : matchers){
+        //Find first pattern match
+        for (ParserMatcher matcher : matchers) {
             matcher.availability = matcher.matcher.find();
         }
 
+        //Find first fragment and separate parent content from parsable children, no match - no content to parse
         BillFragmentWithRules nextBillFragment = getNextFragment(content, matchers);
-        if (nextBillFragment == null){
+        if (nextBillFragment == null) {
             return null;
         }
+        int fragmentContentEnd = nextBillFragment.startPosition - 1;
+        if (fragmentContentEnd < 0) {
+            parent.billFragment.setContent(""); //All is parsable
+        } else {
+            parent.billFragment.setContent(content.substring(0, fragmentContentEnd));
+        }
 
+        //Parse all children according to rules
         List<BillFragmentWithRules> fragmentList = new ArrayList<>();
-        int contentEndPosition = getContentEndPosition(content, nextBillFragment.billFragment);
-
-        while (nextBillFragment != null){
+        while (nextBillFragment != null) {
             fragmentList.add(nextBillFragment);
             nextBillFragment = getNextFragment(content, matchers);
         }
 
-        String newContent = content.substring(0, contentEndPosition);
-        billFragment.setContent(newContent);
-
         return fragmentList;
     }
 
-    private BillFragmentWithRules getNextFragment(String content, List<ParserMatcher> matchers){
+    private BillFragmentWithRules getNextFragment(String content, List<ParserMatcher> matchers) {
         int identifierStartPosition = Integer.MAX_VALUE;
-        int secondLowestIdentifier = Integer.MAX_VALUE;
-        ParserMatcher choosenMatcher = null;
+        ParserMatcher chosenMatcher = null;
 
-        for (ParserMatcher parserMatcher : matchers){
+        //Find the lowest starting position of the new fragment
+        for (ParserMatcher parserMatcher : matchers) {
             if (parserMatcher.availability) {
                 int parserEndPosition = parserMatcher.matcher.start();
                 if (parserEndPosition < identifierStartPosition) {
-                    secondLowestIdentifier = identifierStartPosition;
                     identifierStartPosition = parserEndPosition;
-                    choosenMatcher = parserMatcher;
+                    chosenMatcher = parserMatcher;
                 }
             }
         }
 
-        if (choosenMatcher == null){
+        //No match - no new fragment, if found increase the counter
+        if (chosenMatcher == null) {
             return null;
         }
+        chosenMatcher.timesMatched++;
 
-        int identifierEndPosition = choosenMatcher.matcher.end();
-        choosenMatcher.availability = choosenMatcher.matcher.find();
-        if (choosenMatcher.availability){
-            int newMatchPos = choosenMatcher.matcher.start();
-            if (newMatchPos < secondLowestIdentifier) {
-                secondLowestIdentifier = newMatchPos;
+        int identifierEndPosition = chosenMatcher.matcher.end();
+        //Check whether the rule still applies
+        chosenMatcher.availability = chosenMatcher.matcher.find(); //No next match
+        if(chosenMatcher.rule.parserRuleType == ParserRuleType.Limited
+                && chosenMatcher.timesMatched == chosenMatcher.rule.matchLimit){
+            chosenMatcher.availability = false; //Limit exhausted
+        }
+
+        int contentEndPosition = content.length();
+        //Find the next starting position - end of the current fragment
+        for (ParserMatcher parserMatcher : matchers) {
+            if (parserMatcher.availability) {
+                int parserEndPosition = parserMatcher.matcher.start();
+                if (parserEndPosition < contentEndPosition) {
+                    contentEndPosition = parserEndPosition;
+                }
             }
         }
 
-        List<ParserRule> newBillRules = choosenMatcher.rule.subRules;
-        BillFragment newBillFragment = new BillFragment();
+        //Separate fragment identifier and content from the rest
         String newBillFragmentIdentifier = content.substring(identifierStartPosition, identifierEndPosition);
-        String newBillFragmentContent;
+        String newBillFragmentContent = content.substring(identifierEndPosition + 1, contentEndPosition);
 
-        if (secondLowestIdentifier == Integer.MAX_VALUE){
-            newBillFragmentContent = content.substring(identifierEndPosition + 1, content.length());
-        }
-        else{
-            newBillFragmentContent = content.substring(identifierEndPosition + 1, secondLowestIdentifier);
-        }
-
+        //Creating new fragment and binding parsing rules to it
+        BillFragment newBillFragment = new BillFragment();
+        List<ParserRule> newBillRules = chosenMatcher.rule.subRules;
         newBillFragment.setIdentifier(newBillFragmentIdentifier);
         newBillFragment.setContent(newBillFragmentContent);
 
-        return new BillFragmentWithRules(newBillFragment, newBillRules);
-    }
-
-    private int getContentEndPosition(String content, BillFragment firstBillFragment){
-        return content.indexOf(firstBillFragment.getIdentifier());
+        return new BillFragmentWithRules(newBillFragment, newBillRules, identifierStartPosition);
     }
 }

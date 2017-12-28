@@ -7,11 +7,26 @@ public class ParserRule {
     public final Pattern pattern;
     public final ParserRuleType parserRuleType;
     public final List<ParserRule> subRules;
+    public final Integer matchLimit;
 
-    public ParserRule(String pattern, ParserRuleType parserRuleType) {
+    public ParserRule(String pattern, ParserRuleType parserRuleType, int matchLimit) {
+        if (matchLimit < 0) {
+            throw new IllegalArgumentException("Match limit cannot be negative.");
+        }
         this.pattern = Pattern.compile(pattern);
         this.parserRuleType = parserRuleType;
-        subRules = new ArrayList<>();
+        this.subRules = new ArrayList<>();
+        this.matchLimit = matchLimit;
+    }
+
+    public ParserRule(String pattern, ParserRuleType parserRuleType) {
+        if (parserRuleType == ParserRuleType.Limited){
+            throw new IllegalArgumentException("Match limit required.");
+        }
+        this.pattern = Pattern.compile(pattern);
+        this.parserRuleType = parserRuleType;
+        this.subRules = new ArrayList<>();
+        this.matchLimit = null;
     }
 
     public void addSubRule (ParserRule parserRule){
@@ -23,7 +38,8 @@ public class ParserRule {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ParserRule that = (ParserRule) o;
-        return Objects.equals(pattern, that.pattern) &&
+        return matchLimit == that.matchLimit &&
+                Objects.equals(pattern, that.pattern) &&
                 parserRuleType == that.parserRuleType &&
                 Objects.equals(subRules, that.subRules);
     }
@@ -31,6 +47,6 @@ public class ParserRule {
     @Override
     public int hashCode() {
 
-        return Objects.hash(pattern, parserRuleType, subRules);
+        return Objects.hash(pattern, parserRuleType, subRules, matchLimit);
     }
 }

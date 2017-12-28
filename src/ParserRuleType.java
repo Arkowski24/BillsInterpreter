@@ -1,3 +1,3 @@
 public enum ParserRuleType {
-    Single, Multiple
+    Limited, Unlimited, ifNoMatch
 }
