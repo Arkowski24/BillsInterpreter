@@ -12,6 +12,13 @@ public class BillFragment {
         this.children = new ArrayList<>();
     }
 
+    public BillFragment(String identifier, String content) {
+        this.identifier = identifier;
+        this.content = content;
+        this.parent = null;
+        this.children = new ArrayList<>();
+    }
+
     public String getIdentifier() {
         return identifier;
     }
