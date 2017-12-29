@@ -7,11 +7,11 @@ public class ParserRule {
     public final Pattern pattern;
     public final ParserRuleType parserRuleType;
     public final List<ParserRule> subRules;
-    public final Integer matchLimit;
+    public final int matchLimit;
 
     public ParserRule(String pattern, ParserRuleType parserRuleType, int matchLimit) {
-        if (matchLimit < 0) {
-            throw new IllegalArgumentException("Match limit cannot be negative.");
+        if (matchLimit <= 0) {
+            throw new IllegalArgumentException("Match limit must be a positive number.");
         }
         this.pattern = Pattern.compile(pattern);
         this.parserRuleType = parserRuleType;
@@ -26,7 +26,7 @@ public class ParserRule {
         this.pattern = Pattern.compile(pattern);
         this.parserRuleType = parserRuleType;
         this.subRules = new ArrayList<>();
-        this.matchLimit = null;
+        this.matchLimit = -1;
     }
 
     public void addSubRule (ParserRule parserRule){

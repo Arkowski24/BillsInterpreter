@@ -17,35 +17,72 @@ public class Parser {
         List<String> lines = billDocument.getBillDocumentLines();
         BillFragment billFragment = new BillFragment();
 
-        String content = "";
-        for (String billLine : lines) {
-            content += billLine + "\n";
-        }
-
         billFragment.setParent(null);
-        billFragment.setContent(content);
+        billFragment.setContent(appendContent(lines));
 
         parseBillFragment(new BillFragmentWithRules(billFragment, billParserRules, 0));
 
         billDocument.setBillFragment(billFragment);
     }
 
+    private String appendContent(List<String> lines) {
+        String content = "";
+        for (String billLine : lines) {
+            content += billLine + "\n";
+        }
+        return content;
+    }
+
     public void parseBillFragment(BillFragmentWithRules parent) {
-        if (parent == null || parent.billFragment == null
-                || parent.parserRules == null) {
+        if (parent == null) {
             throw new IllegalArgumentException("Parent fields cannot be null.");
         }
 
-        List<BillFragmentWithRules> children = getChildrenFromParentContent(parent);
-        //If no children then parsing is complete
-        if (children == null)
-            return;
+        BillFragment parsedFragment = parent.billFragment;
+        List<ParserRule> parsingRules = getNormalRules(parent.parserRules);
 
+        List<BillFragmentWithRules> children = getChildrenFromParentContent(new BillFragmentWithRules(parsedFragment, parsingRules, 0));
+        //If no children were found, try using noMatch rules
+        if (children == null){
+            parsingRules = getNoMatchRules(parent.parserRules);
+            if(parsingRules.size() == 0){
+                return;
+            }
+
+            children = getChildrenFromParentContent(new BillFragmentWithRules(parsedFragment, parsingRules, 0));
+            if (children == null){
+                return;
+            }
+        }
+
+        //Bind children to parent and parse their content recursively
         for (BillFragmentWithRules child : children) {
-            child.billFragment.setParent(parent.billFragment);
-            parent.billFragment.addChild(child.billFragment);
+            child.billFragment.setParent(parsedFragment);
+            parsedFragment.addChild(child.billFragment);
             parseBillFragment(child);
         }
+    }
+
+    private List<ParserRule> getNormalRules(List<ParserRule> parserRules){
+        List<ParserRule> noMatchRules = new ArrayList<>();
+
+        for (ParserRule parserRule : parserRules){
+            if (parserRule.parserRuleType != ParserRuleType.NoMatch){
+                noMatchRules.add(parserRule);
+            }
+        }
+        return noMatchRules;
+    }
+
+    private List<ParserRule> getNoMatchRules(List<ParserRule> parserRules){
+        List<ParserRule> noMatchRules = new ArrayList<>();
+
+        for (ParserRule parserRule : parserRules){
+            if (parserRule.parserRuleType == ParserRuleType.NoMatch){
+                noMatchRules.add(parserRule);
+            }
+        }
+        return noMatchRules;
     }
 
     public List<BillFragmentWithRules> getChildrenFromParentContent(BillFragmentWithRules parent) {
