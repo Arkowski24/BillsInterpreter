@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.List;
 
 public class Main {
 
@@ -31,5 +32,7 @@ public class Main {
         parser.addParserRule(parserRule2);
 
         parser.parseDocument(billDocument);
+        String tableOfContents = billDocument.getBillFragment().getTableOfContentsAsLine(2);
+        System.out.print(tableOfContents);
     }
 }

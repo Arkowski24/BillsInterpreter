@@ -59,4 +59,37 @@ public class BillFragment {
     public String toString() {
         return identifier + content;
     }
+
+    public String getTableOfContentsAsLine(int indentSize) {
+        List<String> tableOfContents = getTableOfContents(indentSize);
+        String newToC = "";
+        for (String toc : tableOfContents) {
+            newToC += toc;
+            newToC += "\n";
+        }
+        return newToC;
+    }
+
+    public List<String> getTableOfContents(int indentSize){
+        List<String> tableOfContents = new ArrayList<>();
+        String indent = getSpacesForIndent(indentSize);
+        tableOfContents.add(identifier);
+
+        for (BillFragment child : children){
+            List<String> childTableOfContents = child.getTableOfContents(indentSize);
+            for (String childToC : childTableOfContents){
+                tableOfContents.add(indent + childToC);
+            }
+        }
+        return tableOfContents;
+    }
+
+    private String getSpacesForIndent(int indentSize){
+        StringBuilder stringBuilder = new StringBuilder(indentSize);
+
+        for (int i = 0; i < indentSize; i++){
+            stringBuilder.append(" ");
+        }
+        return stringBuilder.toString();
+    }
 }
