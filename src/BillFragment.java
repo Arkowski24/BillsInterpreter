@@ -19,6 +19,7 @@ public class BillFragment {
         this.children = new ArrayList<>();
     }
 
+    //<editor-fold desc="Getters and Setters">
     public String getIdentifier() {
         return identifier;
     }
@@ -54,12 +55,14 @@ public class BillFragment {
     public void setContent(String content) {
         this.content = content;
     }
+    //</editor-fold>
 
     @Override
     public String toString() {
         return identifier + content;
     }
 
+    //<editor-fold desc="Table Of Contents">
     public String getTableOfContentsAsLine(int indentSize) {
         List<String> tableOfContents = getTableOfContents(indentSize);
         String newToC = "";
@@ -92,4 +95,44 @@ public class BillFragment {
         }
         return stringBuilder.toString();
     }
+    //</editor-fold>
+
+    //<editor-fold desc="Tree Operations">
+    public BillFragment findFragmentWithIdentifier(String identifier){
+        if (identifier == null){
+            throw new IllegalArgumentException("Identifier cannot be null.");
+        }
+
+        if (this.identifier != null && this.identifier.equals(identifier)){
+            return this;
+        }
+        else if (children == null || children.size() == 0){
+            return null;
+        }
+        else {
+            for (BillFragment child : children){
+                BillFragment foundIdentifier = child.findFragmentWithIdentifier(identifier);
+                if (foundIdentifier != null){
+                    return foundIdentifier;
+                }
+            }
+            return null;
+        }
+    }
+
+    public String getContentWithSubchildren(){
+        String contents = "";
+        contents += this.identifier;
+        contents += " ";
+        contents += this.content;
+        contents += "\n";
+
+        for (BillFragment child : this.children){
+            String childContents = child.getContentWithSubchildren();
+            contents += childContents;
+        }
+
+        return contents;
+    }
+    //</editor-fold>
 }
