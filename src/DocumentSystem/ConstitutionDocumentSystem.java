@@ -26,13 +26,22 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
     }
 
     private void fillConstitutionParser(){
-        ParserRule parserRule = new ParserRule("((?m)^[0-9]{3}\\.)|((?m)^[0-9]{2}\\.)|((?m)^[0-9]{1}\\.)", ParserRuleType.Unlimited);
-        ParserRule parserRule1 = new ParserRule("(Art.\\s[0-9]{3}\\.)|(Art.\\s[0-9]{2}\\.)|(Art.\\s[0-9]{1}\\.)", ParserRuleType.Unlimited);
-        ParserRule parserRule2 = new ParserRule("(Rozdział [LCDMIVX]{4})|(Rozdział [LCDMIVX]{3})|(Rozdział [LCDMIVX]{2})|(Rozdział [LCDMIVX])", ParserRuleType.Unlimited);
-        parserRule1.subRules.add(parserRule);
-        parserRule2.subRules.add(parserRule1);
+        ParserRule litera = new ParserRule("((?m)^[0-9a-z]{3}\\))|((?m)^[0-9a-z]{2}\\))|((?m)^[0-9a-z]{1}\\))", ParserRuleType.Unlimited);
+        ParserRule litera2 = new ParserRule("((?m)^[0-9a-z]{3}\\))|((?m)^[0-9a-z]{2}\\))|((?m)^[0-9a-z]{1}\\))", ParserRuleType.NoMatch);
+        ParserRule ustep = new ParserRule("((?m)^[0-9]{3}[a-z]{1}\\.)|((?m)^[0-9]{3}\\.)" +
+                "|((?m)^[0-9]{2}[a-z]{1}\\.)|((?m)^[0-9]{2}\\.)" +
+                "|((?m)^[0-9]{1}[a-z]{1}\\.)|((?m)^[0-9]{1}\\.)", ParserRuleType.Unlimited);
+        ParserRule artykul = new ParserRule("(Art.\\s[0-9]{3}[a-z]{1}\\.)|(Art.\\s[0-9]{3}\\.)" +
+                "|(Art.\\s[0-9]{2}[a-z]{1}\\.)|(Art.\\s[0-9]{2}\\.)" +
+                "|(Art.\\s[0-9]{1}[a-z]{1}\\.)|(Art.\\s[0-9]{1}\\.)", ParserRuleType.Unlimited);
+        ParserRule rozdzial = new ParserRule("(Rozdział [LCDMIVX]{4})|(Rozdział [LCDMIVX]{3})|(Rozdział [LCDMIVX]{2})|(Rozdział [LCDMIVX])", ParserRuleType.Unlimited);
 
-        parser.addParserRule(parserRule2);
+        ustep.addSubRule(litera);
+        artykul.addSubRule(ustep);
+        artykul.addSubRule(litera2);
+        rozdzial.addSubRule(artykul);
+
+        parser.addParserRule(rozdzial);
     }
 
     private BillFragment getChapter(int chapterNumber){
