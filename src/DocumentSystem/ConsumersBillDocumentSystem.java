@@ -1,5 +1,15 @@
-public class ConsumersBillDocumentSystem extends DocumentSystem {
+package DocumentSystem;
 
+import DocumentRepresentation.*;
+import Parser.*;
+
+import java.io.IOException;
+
+public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
+    public ConsumersBillDocumentSystem(String filepath) throws IOException {
+        super();
+        readDocument(filepath);
+    }
 
     private void fillBillParser(){
         ParserRule parserRule = new ParserRule("(^[0-9]{3}\\.)|(^[0-9]{2}\\.)|(^[0-9]{1}\\.)", ParserRuleType.Unlimited);
@@ -8,4 +18,5 @@ public class ConsumersBillDocumentSystem extends DocumentSystem {
         parserRule1.subRules.add(parserRule);
         parserRule2.subRules.add(parserRule1);
     }
+
 }

@@ -1,3 +1,5 @@
+import DocumentSystem.ConstitutionDocumentSystem;
+
 import java.io.IOException;
 
 public class Main {
@@ -12,7 +14,7 @@ public class Main {
             return;
         }
         System.out.print(documentSystem.getTableOfContents());
-        System.out.print(documentSystem.getArticleContent(25));
+        System.out.print(documentSystem.getArticle(25));
         System.out.print(documentSystem.getChapterContent(1));
         System.out.print(documentSystem.getParagraphContent(25, 2));
     }
