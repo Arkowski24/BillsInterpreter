@@ -6,7 +6,7 @@ import Parser.*;
 
 import java.io.IOException;
 
-public class ConstitutionDocumentSystem extends PolishDocumentSystem{
+public class ConstitutionDocumentSystem extends PolishDocumentSystem {
 
     public ConstitutionDocumentSystem(String filepath) throws  IOException{
         super();
@@ -18,7 +18,7 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem{
         parser.parseDocument(billDocument);
     }
 
-    protected void fillCleanerRules(){
+    private void fillCleanerRules(){
         cleaner.addNewCleanRule(new CleanerRule("^[0-9]{4}-[0-9]{2}-[0-9]{2}$", CleanerRuleType.DeleteLineWithPhrase));
         cleaner.addNewCleanRule(new CleanerRule("©Kancelaria Sejmu", CleanerRuleType.DeleteLineWithPhrase));
         cleaner.addNewCleanRule(new CleanerRule("^[a-zA-Z]$", CleanerRuleType.DeleteLineWithPhrase));
@@ -36,10 +36,7 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem{
     }
 
     private BillFragment getChapter(int chapterNumber){
-        if (chapterNumber <= 0){
-            throw new IllegalArgumentException("Chapter number must be positive.");
-        }
-        String chapterIdentifier = "Rozdział " + toRoman(chapterNumber);
+        String chapterIdentifier = "Rozdział " + chapterNumber;
 
         BillFragment chapter = billDocument.getBillFragment().findFirstFragmentWithIdentifier(chapterIdentifier);
         if (chapter == null){

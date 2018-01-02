@@ -2,6 +2,7 @@ package DocumentRepresentation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class BillFragment {
     private String identifier;
@@ -65,28 +66,24 @@ public class BillFragment {
     }
 
     //<editor-fold desc="Table Of Contents">
-    public String getTableOfContentsAsLine(int indentSize) {
-        List<String> tableOfContents = getTableOfContents(indentSize);
-        String newToC = "";
-        for (String toc : tableOfContents) {
-            newToC += toc;
-            newToC += "\n";
-        }
-        return newToC;
-    }
-
-    public List<String> getTableOfContents(int indentSize){
+    public List<String> getTableOfContentsWithEndingPredicate(int indentSize, Predicate<BillFragment> endSubtreePredicate){
         List<String> tableOfContents = new ArrayList<>();
         String indent = getSpacesForIndent(indentSize);
         tableOfContents.add(identifier);
 
-        for (BillFragment child : children){
-            List<String> childTableOfContents = child.getTableOfContents(indentSize);
-            for (String childToC : childTableOfContents){
-                tableOfContents.add(indent + childToC);
+        if (!endSubtreePredicate.test(this)) {
+            for (BillFragment child : children) {
+                List<String> childTableOfContents = child.getTableOfContentsWithEndingPredicate(indentSize, endSubtreePredicate);
+                for (String childToC : childTableOfContents) {
+                    tableOfContents.add(indent + childToC);
+                }
             }
         }
         return tableOfContents;
+    }
+
+    public List<String> getTableOfContents(int indentSize){
+        return getTableOfContentsWithEndingPredicate(indentSize, (x) -> false);
     }
 
     private String getSpacesForIndent(int indentSize){
@@ -100,44 +97,42 @@ public class BillFragment {
     //</editor-fold>
 
     //<editor-fold desc="Tree Operations">
-    public BillFragment findFirstFragmentWithIdentifier(String identifier){
-        if (identifier == null){
-            throw new IllegalArgumentException("Identifier cannot be null.");
+    public List<BillFragment> findFragmentsSatisfyingPredicate(Predicate<BillFragment> predicate){
+        List<BillFragment> fragments = new ArrayList<>();
+        if(predicate.test(this)){
+            fragments.add(this);
         }
-
-        if (this.identifier != null && this.identifier.equals(identifier)){
-            return this;
-        }
-        else if (children == null || children.size() == 0){
-            return null;
-        }
-        else {
+        if (children != null){
             for (BillFragment child : children){
-                BillFragment foundIdentifier = child.findFirstFragmentWithIdentifier(identifier);
-                if (foundIdentifier != null){
-                    return foundIdentifier;
-                }
+                List<BillFragment> childList = child.findFragmentsSatisfyingPredicate(predicate);
+                fragments.addAll(childList);
             }
-            return null;
         }
+        return fragments;
     }
 
     public List<BillFragment> findAllFragmentsWithIdentifier(String identifier){
         if (identifier == null){
             throw new IllegalArgumentException("Identifier cannot be null.");
         }
-        List<BillFragment> billFragments = new ArrayList<>();
+        Predicate<BillFragment> identifierChecker = (BillFragment x) -> x.identifier != null && x.identifier.equals(identifier);
+        return findFragmentsSatisfyingPredicate(identifierChecker);
+    }
 
-        if (this.identifier != null && this.identifier.equals(identifier)){
-            billFragments.add(this);
+    public BillFragment findFirstFragmentWithIdentifier(String identifier){
+        List<BillFragment> fragments;
+        try {
+            fragments = findAllFragmentsWithIdentifier(identifier);
         }
-        else if (children != null) {
-            for (BillFragment child : children){
-                List<BillFragment> childBillFragments = child.findAllFragmentsWithIdentifier(identifier);
-                billFragments.addAll(childBillFragments);
-            }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException(e);
         }
-        return billFragments;
+        if (fragments.size() == 0){
+            return null;
+        }
+        else {
+            return fragments.get(0);
+        }
     }
 
     public String getFragmentContentWithChildren(){

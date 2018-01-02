@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import DocumentRepresentation.*;
 import Parser.*;
@@ -66,18 +66,37 @@ public abstract class AbstractDocumentSystem {
     }
 
     public String getTableOfContents(){
-        if (billDocument.getBillFragment() == null){
-            throw new IllegalStateException("Bill hasn't been parsed, yet.");
-        }
-        return appendList(billDocument.getBillFragment().getTableOfContents(2));
+        return getTableOfContentsForPart(billDocument.getBillFragment(), (x) -> false);
     }
 
-    public BillFragment getPart(BillFragment parent, int partNumber, Function< Integer, String> identifierCreation){
-        if (partNumber <= 0){
-            throw new IllegalArgumentException("Document part number must be positive.");
+    public String getTableOfContentsForPart(BillFragment parent, Predicate<BillFragment> terminalPredicate){
+        if (parent == null){
+            throw new IllegalStateException("Document hasn't been parsed, yet.");
         }
-        String identifier = identifierCreation.apply(partNumber);
 
+        return appendList(parent.getTableOfContentsWithEndingPredicate(2, terminalPredicate));
+    }
+
+    public String getTableOfContentsForPart(String parentIdentifier, Predicate<BillFragment> terminalPredicate){
+        if (billDocument.getBillFragment() == null){
+            throw new IllegalStateException("Document hasn't been parsed, yet.");
+        }
+
+        BillFragment parent;
+        try {
+            parent = billDocument.getBillFragment().findFirstFragmentWithIdentifier(parentIdentifier);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't find part with identifier: " + parentIdentifier);
+        }
+
+        return appendList(parent.getTableOfContentsWithEndingPredicate(2, terminalPredicate));
+    }
+
+    public BillFragment getPart(BillFragment parent, String identifier){
+        if (parent == null){
+            throw new IllegalArgumentException("Parent cannot be null.");
+        }
         BillFragment part = parent.findFirstFragmentWithIdentifier(identifier);
         if (part == null){
             throw new IllegalArgumentException("Couldn't find: " + identifier);
@@ -86,22 +105,58 @@ public abstract class AbstractDocumentSystem {
         return part;
     }
 
-    public List<BillFragment> getPartsInRange(BillFragment parent, int partsNumberStart, int partsNumberEnd, Function< Integer, String> identifierCreation){
-        if (partsNumberStart <= 0 ||  partsNumberEnd <= 0 || partsNumberStart > partsNumberEnd){
-            throw new IllegalArgumentException("Invalid document parts range.");
+    public List<BillFragment> getPartsInRange(BillFragment parent, Predicate<BillFragment> rangePredicate, String fromIdentifier, String toIdentifier){
+        if (parent == null){
+            throw new IllegalArgumentException("Parent cannot be null.");
+        }
+        List<BillFragment> fragmentsInScope = parent.findFragmentsSatisfyingPredicate(rangePredicate);
+
+        if (fragmentsInScope.size() == 0) {
+            throw new IllegalArgumentException("Couldn't find elements with given predicate.");
         }
 
-        List<BillFragment> parts = new ArrayList<>();
-        for (int i = partsNumberStart; i <= partsNumberEnd; i++){
-            try{
-                BillFragment part = getPart(parent, i, identifierCreation);
-                parts.add(part);
-            }
-            catch (IllegalArgumentException e){
-                throw new IllegalArgumentException("Invalid range. " + e);
-            }
+        int startPosition = getStartPosition(fragmentsInScope, fromIdentifier);
+        int endPosition = getEndPosition(fragmentsInScope, toIdentifier);
+
+        if (startPosition == -1){
+            throw new IllegalArgumentException("Couldn't find start of range for: " + fromIdentifier);
         }
-        return parts;
+        if (endPosition == -1){
+            throw new IllegalArgumentException("Couldn't find end of range for: " + toIdentifier);
+        }
+
+        return fragmentsInScope.subList(startPosition, endPosition + 1);
     }
 
+    protected List<String> getPartsContents (List<BillFragment> parts){
+        List<String> contents = new ArrayList<>();
+        for (BillFragment part : parts){
+            contents.add(part.getFragmentContentWithChildren());
+        }
+        return contents;
+    }
+
+    private int getStartPosition(List<BillFragment> scope, String startIdentifier) {
+        int startPosition = -1;
+        for (int i = 0; i < scope.size(); i++) {
+            if (scope.get(i).getIdentifier().equals(startIdentifier)) {
+                startPosition = i;
+                break;
+
+            }
+        }
+        return startPosition;
+    }
+
+    private int getEndPosition(List<BillFragment> scope, String endIdentifier){
+        int endPosition = -1;
+        for (int i = scope.size() - 1; i >= 0; i--) {
+            if (scope.get(i).getIdentifier().equals(endIdentifier)) {
+                endPosition = i;
+                break;
+
+            }
+        }
+        return endPosition;
+    }
 }
