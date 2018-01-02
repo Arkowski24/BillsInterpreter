@@ -98,7 +98,7 @@ public class BillFragment {
     //</editor-fold>
 
     //<editor-fold desc="Tree Operations">
-    public BillFragment findFragmentWithIdentifier(String identifier){
+    public BillFragment findFirstFragmentWithIdentifier(String identifier){
         if (identifier == null){
             throw new IllegalArgumentException("Identifier cannot be null.");
         }
@@ -111,7 +111,7 @@ public class BillFragment {
         }
         else {
             for (BillFragment child : children){
-                BillFragment foundIdentifier = child.findFragmentWithIdentifier(identifier);
+                BillFragment foundIdentifier = child.findFirstFragmentWithIdentifier(identifier);
                 if (foundIdentifier != null){
                     return foundIdentifier;
                 }
@@ -120,7 +120,25 @@ public class BillFragment {
         }
     }
 
-    public String getContentWithSubchildren(){
+    public List<BillFragment> findAllFragmentsWithIdentifier(String identifier){
+        if (identifier == null){
+            throw new IllegalArgumentException("Identifier cannot be null.");
+        }
+        List<BillFragment> billFragments = new ArrayList<>();
+
+        if (this.identifier != null && this.identifier.equals(identifier)){
+            billFragments.add(this);
+        }
+        else if (children != null) {
+            for (BillFragment child : children){
+                List<BillFragment> childBillFragments = child.findAllFragmentsWithIdentifier(identifier);
+                billFragments.addAll(childBillFragments);
+            }
+        }
+        return billFragments;
+    }
+
+    public String getFragmentContentWithChildren(){
         String contents = "";
         contents += this.identifier;
         contents += " ";
@@ -128,7 +146,7 @@ public class BillFragment {
         contents += "\n";
 
         for (BillFragment child : this.children){
-            String childContents = child.getContentWithSubchildren();
+            String childContents = child.getFragmentContentWithChildren();
             contents += childContents;
         }
 
