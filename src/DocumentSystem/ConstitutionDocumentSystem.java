@@ -26,8 +26,8 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
     }
 
     private void fillConstitutionParser(){
-        ParserRule litera = new ParserRule("((?m)^[0-9a-z]{3}\\))|((?m)^[0-9a-z]{2}\\))|((?m)^[0-9a-z]{1}\\))", ParserRuleType.Unlimited);
-        ParserRule litera2 = new ParserRule("((?m)^[0-9a-z]{3}\\))|((?m)^[0-9a-z]{2}\\))|((?m)^[0-9a-z]{1}\\))", ParserRuleType.NoMatch);
+        ParserRule punkt = new ParserRule("((?m)^[0-9a-z]{3}\\))|((?m)^[0-9a-z]{2}\\))|((?m)^[0-9a-z]{1}\\))", ParserRuleType.Unlimited);
+        ParserRule punkt2 = new ParserRule("((?m)^[0-9a-z]{3}\\))|((?m)^[0-9a-z]{2}\\))|((?m)^[0-9a-z]{1}\\))", ParserRuleType.NoMatch);
         ParserRule ustep = new ParserRule("((?m)^[0-9]{3}[a-z]{1}\\.)|((?m)^[0-9]{3}\\.)" +
                 "|((?m)^[0-9]{2}[a-z]{1}\\.)|((?m)^[0-9]{2}\\.)" +
                 "|((?m)^[0-9]{1}[a-z]{1}\\.)|((?m)^[0-9]{1}\\.)", ParserRuleType.Unlimited);
@@ -36,16 +36,16 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
                 "|(Art.\\s[0-9]{1}[a-z]{1}\\.)|(Art.\\s[0-9]{1}\\.)", ParserRuleType.Unlimited);
         ParserRule rozdzial = new ParserRule("(Rozdział [LCDMIVX]{4})|(Rozdział [LCDMIVX]{3})|(Rozdział [LCDMIVX]{2})|(Rozdział [LCDMIVX])", ParserRuleType.Unlimited);
 
-        ustep.addSubRule(litera);
+        ustep.addSubRule(punkt);
         artykul.addSubRule(ustep);
-        artykul.addSubRule(litera2);
+        artykul.addSubRule(punkt2);
         rozdzial.addSubRule(artykul);
 
         parser.addParserRule(rozdzial);
     }
 
     private BillFragment getChapter(int chapterNumber){
-        String chapterIdentifier = "Rozdział " + chapterNumber;
+        String chapterIdentifier = "Rozdział " + getRomanNumber(Integer.toString(chapterNumber));
 
         BillFragment chapter = billDocument.getBillFragment().findFirstFragmentWithIdentifier(chapterIdentifier);
         if (chapter == null){
@@ -53,18 +53,6 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         }
 
         return chapter;
-    }
-
-    //To Do - Implement Roman Numbers Converter
-    private String toRoman(int number){
-        switch (number){
-            case 1:
-                return "I";
-            case 2:
-                return "II";
-            default:
-                return "I";
-        }
     }
 
     public String getChapterContent(int chapterNumber) {
@@ -78,7 +66,6 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
 
         return chapter.getFragmentContentWithChildren();
     }
-
 
     public String getChapterTableOfContents(int chapterNumber){
         BillFragment chapter;

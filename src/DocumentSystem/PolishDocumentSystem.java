@@ -2,9 +2,7 @@ package DocumentSystem;
 
 import DocumentRepresentation.BillFragment;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
@@ -20,6 +18,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
         return appendList(fragment.getTableOfContentsWithEndingPredicate(2, terminalPredicate));
     }
 
+    //<editor-fold desc="Document fragment retrievers">
     public BillFragment getArticle(String articleNumber){
         List<BillFragment> article;
         try {
@@ -53,7 +52,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
         String paragraphIdentifier = paragraphNumber + ".";
         BillFragment paragraph;
         try {
-            paragraph = getPart(article, paragraphIdentifier);
+            paragraph = getPartWithIdentifier(article, paragraphIdentifier);
         }
         catch (IllegalArgumentException e){
             throw new IllegalArgumentException("Couldn't retrieve paragraph: " + e);
@@ -76,6 +75,52 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
 
         List<BillFragment> paragraphs = getPartsInRange(article, paragraphPredicate, rangeStartIdentifier, rangeEndIdentifier);
         return paragraphs;
+    }
+
+    public BillFragment getPoint(String articleNumber, String paragraphNumber, String pointNumber){
+        BillFragment paragraph = getParagraph(articleNumber, paragraphNumber);
+        String pointIdentifier = pointNumber + ")";
+        BillFragment point;
+        try {
+            point = getPartWithIdentifier(paragraph, pointIdentifier);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't retrieve point: " + e);
+        }
+        return point;
+    }
+
+    public BillFragment getPoint(String articleNumber, String pointNumber){
+        BillFragment article = getArticle(articleNumber);
+        String pointIdentifier = pointNumber + ")";
+        BillFragment point;
+        try {
+            point = getPartWithIdentifier(article, pointIdentifier);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't retrieve point: " + e);
+        }
+        return point;
+    }
+
+    public List<BillFragment> getPointsInRange(String articleNumber, String paragraphNumber, String rangeStart, String rangeEnd){
+        BillFragment paragraph = getParagraph(articleNumber, paragraphNumber);
+
+        Predicate<BillFragment> pointsPredicate = (x) -> x.getIdentifier() != null && x.getIdentifier().matches("[0-9]+\\)");
+        String rangeStartIdentifier = rangeStart + ")";
+        String rangeEndIdentifier = rangeEnd + ")";
+        List<BillFragment> points = getPartsInRange(paragraph, pointsPredicate, rangeStartIdentifier, rangeEndIdentifier);
+        return points;
+    }
+
+    public List<BillFragment> getPointsInRange(String articleNumber, String rangeStart, String rangeEnd){
+        BillFragment article = getArticle(articleNumber);
+
+        Predicate<BillFragment> pointsPredicate = (x) -> x.getIdentifier() != null && x.getIdentifier().matches("[0-9]+\\)");
+        String rangeStartIdentifier = rangeStart + ")";
+        String rangeEndIdentifier = rangeEnd + ")";
+        List<BillFragment> points = getPartsInRange(article, pointsPredicate, rangeStartIdentifier, rangeEndIdentifier);
+        return points;
     }
     //</editor-fold>
 
@@ -116,7 +161,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
         return paragraph.getFragmentContentWithChildren();
     }
 
-    public List<String> getParagraphInRangeContents(String articleNumber, String rangeStart, String rangeEnd){
+    public List<String> getParagraphsInRangeContents(String articleNumber, String rangeStart, String rangeEnd){
         List<BillFragment> paragraphs;
         try {
             paragraphs = getParagraphInRange(articleNumber, rangeStart, rangeEnd);
@@ -128,5 +173,50 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
         return getPartsContents(paragraphs);
     }
 
+    public String getPointContent(String articleNumber, String paragraphNumber, String pointNumber){
+        BillFragment point;
+        try {
+            point = getPoint(articleNumber, paragraphNumber, pointNumber);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't get content. " + e);
+        }
+        return point.getFragmentContentWithChildren();
+    }
+
+    public String getPointContent(String articleNumber, String pointNumber){
+        BillFragment point;
+        try {
+            point = getPoint(articleNumber, pointNumber);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't get content. " + e);
+        }
+        return point.getFragmentContentWithChildren();
+    }
+
+    public List<String> getPointsInRangeContents(String articleNumber, String paragraph, String rangeStart, String rangeEnd){
+        List<BillFragment> points;
+        try {
+            points = getPointsInRange(articleNumber, paragraph, rangeStart, rangeEnd);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't get content. " + e);
+        }
+
+        return getPartsContents(points);
+    }
+
+    public List<String> getPointsInRangeContents(String articleNumber, String rangeStart, String rangeEnd){
+        List<BillFragment> points;
+        try {
+            points = getPointsInRange(articleNumber, rangeStart, rangeEnd);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't get content. " + e);
+        }
+
+        return getPartsContents(points);
+    }
     //</editor-fold>
 }

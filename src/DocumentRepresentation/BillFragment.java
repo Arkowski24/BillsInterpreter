@@ -97,14 +97,22 @@ public class BillFragment {
     //</editor-fold>
 
     //<editor-fold desc="Tree Operations">
-    public List<BillFragment> findFragmentsSatisfyingPredicate(Predicate<BillFragment> predicate){
+    public BillFragment findFirstFragmentSatisfyingPredicate(Predicate<BillFragment> predicate){
+        List<BillFragment> fragments = findAllFragmentsSatisfyingPredicate(predicate);
+        if (fragments.size() == 0){
+            throw new IllegalArgumentException("Couldn't find fragment satisfying predicate.");
+        }
+        return fragments.get(0);
+    }
+
+    public List<BillFragment> findAllFragmentsSatisfyingPredicate(Predicate<BillFragment> predicate){
         List<BillFragment> fragments = new ArrayList<>();
         if(predicate.test(this)){
             fragments.add(this);
         }
         if (children != null){
             for (BillFragment child : children){
-                List<BillFragment> childList = child.findFragmentsSatisfyingPredicate(predicate);
+                List<BillFragment> childList = child.findAllFragmentsSatisfyingPredicate(predicate);
                 fragments.addAll(childList);
             }
         }
@@ -116,7 +124,7 @@ public class BillFragment {
             throw new IllegalArgumentException("Identifier cannot be null.");
         }
         Predicate<BillFragment> identifierChecker = (BillFragment x) -> x.identifier != null && x.identifier.equals(identifier);
-        return findFragmentsSatisfyingPredicate(identifierChecker);
+        return findAllFragmentsSatisfyingPredicate(identifierChecker);
     }
 
     public BillFragment findFirstFragmentWithIdentifier(String identifier){

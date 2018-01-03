@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import DocumentRepresentation.*;
 import Parser.*;
 import Cleaner.*;
+import com.frequal.romannumerals.Converter;
 
 public abstract class AbstractDocumentSystem {
     protected Cleaner cleaner;
@@ -21,6 +22,7 @@ public abstract class AbstractDocumentSystem {
         parser = new Parser();
     }
 
+    //<editor-fold desc="Read document methods">
     protected List<String> readFile(String filepath) throws IOException {
         List<String> documentLines = new ArrayList<>();
 
@@ -64,36 +66,38 @@ public abstract class AbstractDocumentSystem {
         }
         return newString;
     }
+    //</editor-fold>
 
-    public String getTableOfContents(){
-        return getTableOfContentsForPart(billDocument.getBillFragment(), (x) -> false);
+    //<editor-fold desc="Document parts retrieval methods">
+    public BillFragment getPartWithSearchPattern(BillFragment parent, List<String> identifierSearchPattern){
+        if (identifierSearchPattern == null || identifierSearchPattern.size() == 0){
+            throw new IllegalArgumentException("Wrong search pattern");
+        }
+        BillFragment checked = parent;
+        for (String identifier : identifierSearchPattern){
+            try {
+                checked = getPartWithIdentifier(checked, identifier);
+            }
+            catch (IllegalArgumentException e){
+                throw new IllegalArgumentException("Wrong search pattern. " + e);
+            }
+        }
+        return checked;
     }
 
-    public String getTableOfContentsForPart(BillFragment parent, Predicate<BillFragment> terminalPredicate){
-        if (parent == null){
-            throw new IllegalStateException("Document hasn't been parsed, yet.");
-        }
-
-        return appendList(parent.getTableOfContentsWithEndingPredicate(2, terminalPredicate));
-    }
-
-    public String getTableOfContentsForPart(String parentIdentifier, Predicate<BillFragment> terminalPredicate){
-        if (billDocument.getBillFragment() == null){
-            throw new IllegalStateException("Document hasn't been parsed, yet.");
-        }
-
-        BillFragment parent;
+    public List<BillFragment> getPartsWithSearchPatternInRange(BillFragment parent, List<String> identifierSearchPattern,
+                                                         Predicate<BillFragment> rangePredicate, String fromIdentifier, String toIdentifier){
+        BillFragment checked;
         try {
-            parent = billDocument.getBillFragment().findFirstFragmentWithIdentifier(parentIdentifier);
+            checked = getPartWithSearchPattern(parent, identifierSearchPattern);
         }
         catch (IllegalArgumentException e){
-            throw new IllegalArgumentException("Couldn't find part with identifier: " + parentIdentifier);
+            throw new IllegalArgumentException("Couldn't get fragment for range search.");
         }
-
-        return appendList(parent.getTableOfContentsWithEndingPredicate(2, terminalPredicate));
+        return getPartsInRange(checked, rangePredicate, fromIdentifier, toIdentifier);
     }
 
-    public BillFragment getPart(BillFragment parent, String identifier){
+    public BillFragment getPartWithIdentifier(BillFragment parent, String identifier){
         if (parent == null){
             throw new IllegalArgumentException("Parent cannot be null.");
         }
@@ -109,7 +113,7 @@ public abstract class AbstractDocumentSystem {
         if (parent == null){
             throw new IllegalArgumentException("Parent cannot be null.");
         }
-        List<BillFragment> fragmentsInScope = parent.findFragmentsSatisfyingPredicate(rangePredicate);
+        List<BillFragment> fragmentsInScope = parent.findAllFragmentsSatisfyingPredicate(rangePredicate);
 
         if (fragmentsInScope.size() == 0) {
             throw new IllegalArgumentException("Couldn't find elements with given predicate.");
@@ -126,14 +130,6 @@ public abstract class AbstractDocumentSystem {
         }
 
         return fragmentsInScope.subList(startPosition, endPosition + 1);
-    }
-
-    protected List<String> getPartsContents (List<BillFragment> parts){
-        List<String> contents = new ArrayList<>();
-        for (BillFragment part : parts){
-            contents.add(part.getFragmentContentWithChildren());
-        }
-        return contents;
     }
 
     private int getStartPosition(List<BillFragment> scope, String startIdentifier) {
@@ -158,5 +154,37 @@ public abstract class AbstractDocumentSystem {
             }
         }
         return endPosition;
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Table of contents methods">
+    public String getTableOfContents(){
+        return getTableOfContentsForPart(billDocument.getBillFragment(), (x) -> false);
+    }
+
+    public String getTableOfContentsForPart(BillFragment parent, Predicate<BillFragment> terminalPredicate){
+        if (parent == null){
+            throw new IllegalStateException("Document hasn't been parsed, yet.");
+        }
+
+        return appendList(parent.getTableOfContentsWithEndingPredicate(2, terminalPredicate));
+    }
+    //</editor-fold>
+
+    protected List<String> getPartsContents (List<BillFragment> parts){
+        List<String> contents = new ArrayList<>();
+        for (BillFragment part : parts){
+            contents.add(part.getFragmentContentWithChildren());
+        }
+        return contents;
+    }
+
+    protected String getRomanNumber(String number){
+        Converter romanConverter = new Converter();
+        String digitPart = number.replaceAll("\\D+", "");
+        String lettersPart = number.replaceAll("\\d+", "");
+
+        int numberFromDigits = Integer.parseInt(digitPart);
+        return romanConverter.toRomanNumerals(numberFromDigits) + lettersPart;
     }
 }
