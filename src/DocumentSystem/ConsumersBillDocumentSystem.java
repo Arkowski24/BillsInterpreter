@@ -31,7 +31,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
                 System.out.println(this.getSectionTableOfContents(section));
             }
             catch (IllegalArgumentException e){
-                System.out.println("No such section.");
+                System.err.println("No such section.");
                 return;
             }
         }
@@ -48,7 +48,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
                 System.out.println(this.getSectionContent(sectionNumber));
             }
             catch(IllegalArgumentException e){
-                System.out.println("No such section.");
+                System.err.println("No such section.");
             }
         }
         else {
@@ -56,7 +56,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
                 System.out.println(this.getChapterContent(sectionNumber, chapterNumber));
             }
             catch(IllegalArgumentException e){
-                System.out.println("No such section or chapter.");
+                System.err.println("No such section or chapter.");
             }
         }
     }
@@ -69,7 +69,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         String letterNumber = getLetterSpecific(specifics);
 
         if (articleNumber == null){
-            System.out.println("Article number required.");
+            System.err.println("Article number required.");
             return;
         }
 
@@ -82,7 +82,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
                 System.out.println(getLetter(articleNumber, paragraphNumber, pointNumber, letterNumber));
             }
             catch (IllegalArgumentException e){
-                System.out.println("No such paragraph.");
+                System.err.println("No such paragraph.");
                 return;
             }
         }

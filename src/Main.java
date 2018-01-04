@@ -18,23 +18,28 @@ public class Main {
             fillOptionsForJsapParser(jsap);
         }
         catch (JSAPException e){
-            System.out.println("Couldn't add options to parser.");
+            System.err.println("Couldn't add options to parser.");
             return;
         }
         try {
             results = jsap.parse(args);
         }
         catch (Exception e){
-            System.out.println("Couldn't parse given options.");
+            System.err.println("Couldn't parse given options.");
+            System.err.println(jsap.getUsage());
             return;
         }
         String filePath = results.getString("filepath");
+        if (filePath == null){
+            System.err.println("No file path specified.");
+            return;
+        }
         List<String> fileLines;
         try {
             fileLines = AbstractDocumentSystem.readFile(filePath);
         }
         catch (IOException e){
-            System.out.println("Couldn't read file.");
+            System.err.println("Couldn't read file.");
             return;
         }
         switch (PolishDocumentSystem.checkDocumentType(fileLines)){
@@ -49,6 +54,10 @@ public class Main {
     }
 
     private static void fillOptionsForJsapParser(JSAP parser) throws JSAPException{
+        Switch helpOption = new Switch("showHelp")
+                .setShortFlag('h')
+                .setLongFlag("help");
+
         UnflaggedOption fileOption = new UnflaggedOption("filepath")
                 .setStringParser(JSAP.STRING_PARSER)
                 .setRequired(true);

@@ -32,7 +32,7 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
                 System.out.println(this.getChapterTableOfContents(chapter));
             }
             catch (IllegalArgumentException e){
-                System.out.println("No such chapter.");
+                System.err.println("No such chapter.");
                 return;
             }
         }
@@ -53,7 +53,7 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         String pointNumber = getPointSpecific(specifics);
 
         if (articleNumber == null){
-            System.out.println("Article number required.");
+            System.err.println("Article number required.");
             return;
         }
 

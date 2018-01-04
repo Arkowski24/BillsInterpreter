@@ -58,7 +58,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
                 articlesToPrint.addAll(this.getArticlesInRangeContents(articles[i], articles[i + 1]));
             }
             catch (IllegalArgumentException e){
-                System.out.println("Given range is not valid.");
+                System.err.println("Given range is not valid.");
                 return;
             }
         }
@@ -74,7 +74,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
             System.out.println(getArticleContent(articleNumber));
         }
         catch (IllegalArgumentException e){
-            System.out.println("No such article.");
+            System.err.println("No such article.");
             return;
         }
     }
@@ -87,7 +87,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
                 try {
                     System.out.println(getPointContent(articleNumber, paragraphNumber, pointNumber));
                 } catch (IllegalArgumentException e) {
-                    System.out.println("No such paragraph.");
+                    System.err.println("No such point.");
                     return;
                 }
             }
@@ -95,7 +95,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
                 try {
                     System.out.println(getPointContent(articleNumber, pointNumber));
                 } catch (IllegalArgumentException e) {
-                    System.out.println("No such paragraph.");
+                    System.err.println("No such point.");
                     return;
                 }
             }
@@ -111,7 +111,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
                 System.out.println(getParagraphContent(articleNumber, paragraphNumber));
             }
             catch (IllegalArgumentException e){
-                System.out.println("No such paragraph.");
+                System.err.println("No such paragraph.");
                 return;
             }
         }
@@ -126,7 +126,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
                 System.out.println(getArticleContent(articleNumber));
             }
             catch (IllegalArgumentException e){
-                System.out.println("No such paragraph.");
+                System.err.println("No such article.");
                 return;
             }
         }
