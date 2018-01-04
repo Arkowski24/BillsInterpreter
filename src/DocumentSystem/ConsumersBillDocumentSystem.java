@@ -156,9 +156,16 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
     }
 
     public BillFragment getChapter(String sectionNumber, String chapterNumber){
-        String chapterIdentifier = "Rozdział" + chapterNumber;
+        BillFragment section;
+        try {
+            section = getSection(sectionNumber);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't find section. " + e);
+        }
+        String chapterIdentifier = "Rozdział " + chapterNumber;
 
-        BillFragment chapter = billDocument.getBillFragment().findFirstFragmentWithIdentifier(chapterIdentifier);
+        BillFragment chapter = section.findFirstFragmentWithIdentifier(chapterIdentifier);
         if (chapter == null){
             throw new IllegalArgumentException("Couldn't find: " + chapterIdentifier);
         }
