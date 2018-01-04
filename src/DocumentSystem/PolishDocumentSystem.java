@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
+    PolishDocumentSystem(){
+        super();
+    }
+
     public abstract void interpret(JSAPResult parsingResults);
 
     protected void interpretShowArticleRange(JSAPResult parsingResults) {

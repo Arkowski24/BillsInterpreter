@@ -141,8 +141,8 @@ public class Parser {
         int contentEndPosition = getEndOfContentPosition(content, matchers);
 
         //Separate fragment identifier and content from the rest
-        String newBillFragmentIdentifier = content.substring(identifierStartPosition, identifierEndPosition);
-        String newBillFragmentContent = content.substring(contentStartPosition, contentEndPosition);
+        String newBillFragmentIdentifier = deleteWhiteCharsFromBeginningAndEnd(content.substring(identifierStartPosition, identifierEndPosition));
+        String newBillFragmentContent = deleteWhiteCharsFromBeginningAndEnd(content.substring(contentStartPosition, contentEndPosition));
 
         //Creating new fragment and binding parsing rules to it
         List<ParserRule> newBillRules = chosenMatcher.rule.subRules;
@@ -194,5 +194,11 @@ public class Parser {
         else {
             return chosenMatcher.matcher.start();
         }
+    }
+
+    private String deleteWhiteCharsFromBeginningAndEnd(String content){
+        content = content.replaceAll("^[ \\t\\n\\r]+", "");
+        content = content.replaceAll("[ \\t\\n\\r]+$", "");
+        return content;
     }
 }

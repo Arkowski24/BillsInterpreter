@@ -72,7 +72,7 @@ public class Cleaner {
 
     private boolean containsPattern(String line, Pattern pattern){
         Matcher matcher = pattern.matcher(line);
-        return matcher.matches();
+        return matcher.find();
     }
 
     private String deletePhraseFromLine(String line, Pattern pattern){
