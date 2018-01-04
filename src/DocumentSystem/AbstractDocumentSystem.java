@@ -215,6 +215,9 @@ public abstract class AbstractDocumentSystem {
     protected boolean isRomanNumber(String number){
         Converter romanConverter = new Converter();
         String digitPart = number.replaceAll("[^MDCLXVI]+", "");
+        if (digitPart.length() == 0) {
+            return false;
+        }
         try {
             romanConverter.toNumber(digitPart);
         }

@@ -212,7 +212,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         return letter;
     }
 
-    public List<String> getSectionTableOfContents(String sectionNumber){
+    public String getSectionTableOfContents(String sectionNumber){
         BillFragment section;
         try {
             section = getSection(sectionNumber);
@@ -221,8 +221,9 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
             throw new IllegalArgumentException("Couldn't get table of contents.");
         }
 
-        Predicate<BillFragment> articleEnding = (BillFragment x) -> x.getIdentifier() != null && x.getIdentifier().contains("Rozdział");
-        return section.getTableOfContentsWithEndingPredicate(2, articleEnding);
+        Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() == null || x.getIdentifier().contains("Rozdział") || x.getIdentifier().contains("DZIAŁ"));
+        Predicate<String> contentPredicate = (String x) -> true;
+        return appendList(section.getTableOfContentsWithEndingPredicateAndContentPredicate(2, terminalPredicate, contentPredicate));
     }
 
     public String getSectionContent(String sectionNumber) {
