@@ -7,6 +7,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -43,6 +44,20 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
             interpretShowArticleRange(parsingResults);
         }
         else System.out.println(this.getChapterContent(chapterNumber));
+    }
+
+    protected void showArticleSpecifics(JSAPResult parsingResults){
+        List<String> specifics = correctSpecifics(Arrays.asList(parsingResults.getStringArray("articleSpecifics")));
+        String articleNumber = getArticleSpecific(specifics);
+        String paragraphNumber = getParagraphSpecific(specifics);
+        String pointNumber = getPointSpecific(specifics);
+
+        if (articleNumber == null){
+            System.out.println("Article number required.");
+            return;
+        }
+
+        showPoint(pointNumber, paragraphNumber, articleNumber);
     }
 
     public ConstitutionDocumentSystem(String filepath) throws  IOException{

@@ -39,7 +39,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
             System.out.println(this.billDocument.getBillFragment().getFragmentContentWithChildren());
         }
         else {
-            ShowArticleSpecifics(parsingResults);
+            showArticleSpecifics(parsingResults);
         }
     }
 
@@ -79,10 +79,102 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
         }
     }
 
-    private void ShowArticleSpecifics(JSAPResult parsingResults){
+    protected abstract void showArticleSpecifics(JSAPResult parsingResults);
 
+    protected void showPoint(String pointNumber, String paragraphNumber, String articleNumber){
+        if (pointNumber != null && articleNumber != null){
+            if (paragraphNumber != null) {
+                try {
+                    System.out.println(getPointContent(articleNumber, paragraphNumber, pointNumber));
+                } catch (IllegalArgumentException e) {
+                    System.out.println("No such paragraph.");
+                    return;
+                }
+            }
+            else {
+                try {
+                    System.out.println(getPointContent(articleNumber, pointNumber));
+                } catch (IllegalArgumentException e) {
+                    System.out.println("No such paragraph.");
+                    return;
+                }
+            }
+        }
+        else {
+            showParagraph(paragraphNumber, articleNumber);
+        }
     }
 
+    protected void showParagraph(String paragraphNumber, String articleNumber){
+        if (paragraphNumber != null && articleNumber != null){
+            try {
+                System.out.println(getParagraphContent(articleNumber, paragraphNumber));
+            }
+            catch (IllegalArgumentException e){
+                System.out.println("No such paragraph.");
+                return;
+            }
+        }
+        else {
+            showArticle(articleNumber);
+        }
+    }
+
+    protected  void  showArticle(String articleNumber){
+        if (articleNumber != null){
+            try {
+                System.out.println(getArticleContent(articleNumber));
+            }
+            catch (IllegalArgumentException e){
+                System.out.println("No such paragraph.");
+                return;
+            }
+        }
+    }
+
+    protected List<String> correctSpecifics(List<String> specifics){
+        String appended = "";
+        for (String specific : specifics){
+            appended += specific.replaceAll("\\.","").replaceAll("\\)", "");
+        }
+        return Arrays.asList(appended.split(","));
+    }
+
+    protected String getArticleSpecific(List<String> specifics){
+        for (String specific : specifics){
+            if (specific.matches("^art[0-9]+")){
+                return specific.substring(3);
+            }
+        }
+        return null;
+    }
+
+    protected String getParagraphSpecific(List<String> specifics){
+        for (String specific : specifics){
+            if (specific.matches("^ust[0-9]+")){
+                return specific.substring(3);
+            }
+        }
+        return null;
+    }
+
+    protected String getPointSpecific(List<String> specifics){
+        for (String specific : specifics){
+            if (specific.matches("^pkt[0-9]+")){
+                return specific.substring(3);
+            }
+        }
+        return null;
+    }
+
+    protected String getLetterSpecific(List<String> specifics){
+        for (String specific : specifics){
+            if (specific.matches("^lit[a-z]+")){
+                return specific.substring(3);
+            }
+        }
+        return null;
+    }
     @Override
     public abstract String getTableOfContents();
 

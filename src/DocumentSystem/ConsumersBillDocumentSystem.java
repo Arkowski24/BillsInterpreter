@@ -6,6 +6,7 @@ import Parser.*;
 import com.martiansoftware.jsap.JSAPResult;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -57,6 +58,36 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
             catch(IllegalArgumentException e){
                 System.out.println("No such section or chapter.");
             }
+        }
+    }
+
+    protected void showArticleSpecifics(JSAPResult parsingResults){
+        List<String> specifics = correctSpecifics(Arrays.asList(parsingResults.getStringArray("articleSpecifics")));
+        String articleNumber = getArticleSpecific(specifics);
+        String paragraphNumber = getParagraphSpecific(specifics);
+        String pointNumber = getPointSpecific(specifics);
+        String letterNumber = getLetterSpecific(specifics);
+
+        if (articleNumber == null){
+            System.out.println("Article number required.");
+            return;
+        }
+
+        showLetter(letterNumber, pointNumber, paragraphNumber, articleNumber);
+    }
+
+    protected void showLetter(String letterNumber, String pointNumber, String paragraphNumber, String articleNumber){
+        if (letterNumber != null && pointNumber != null && paragraphNumber != null && articleNumber != null){
+            try {
+                System.out.println(getLetter(articleNumber, paragraphNumber, pointNumber, letterNumber));
+            }
+            catch (IllegalArgumentException e){
+                System.out.println("No such paragraph.");
+                return;
+            }
+        }
+        else {
+            showPoint(pointNumber, paragraphNumber, articleNumber);
         }
     }
 
