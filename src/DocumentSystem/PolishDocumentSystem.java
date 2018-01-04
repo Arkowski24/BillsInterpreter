@@ -137,6 +137,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
         for (String specific : specifics){
             appended += specific.replaceAll("\\.","").replaceAll("\\)", "");
         }
+        appended = appended.toLowerCase();
         return Arrays.asList(appended.split(","));
     }
 
