@@ -144,17 +144,21 @@ public class BillFragment {
     }
 
     public String getFragmentContentWithChildren(){
+        return getFragmentContentWithChildren((x) -> false);
+    }
+
+    public String getFragmentContentWithChildren(Predicate<BillFragment> endingPredicate){
         String contents = "";
         contents += this.identifier;
         contents += " ";
         contents += this.content;
         contents += "\n";
-
-        for (BillFragment child : this.children){
-            String childContents = child.getFragmentContentWithChildren();
-            contents += childContents;
+        if (!endingPredicate.test(this)) {
+            for (BillFragment child : this.children) {
+                String childContents = child.getFragmentContentWithChildren();
+                contents += childContents;
+            }
         }
-
         return contents;
     }
     //</editor-fold>

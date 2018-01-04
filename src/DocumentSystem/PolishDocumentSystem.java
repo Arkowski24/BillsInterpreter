@@ -1,11 +1,60 @@
 package DocumentSystem;
 
 import DocumentRepresentation.BillFragment;
+import DocumentRepresentation.DocumentType;
+import com.martiansoftware.jsap.JSAPResult;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
 public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
+    public abstract void interpret(JSAPResult parsingResults);
+
+    protected void interpretShowArticleRange(JSAPResult parsingResults) {
+        String[] articlesNumbers = parsingResults.getStringArray("articles");
+        if (articlesNumbers == null ){
+            interpretShowArticle(parsingResults);
+        }
+        else showArticleRange(parsingResults);
+    }
+
+    protected void interpretShowArticle(JSAPResult parsingResults){
+        String articleNumber = parsingResults.getString("article");
+        if (articleNumber == null ){
+            interpretShowArticleSpecifics(parsingResults);
+        }
+        else showArticleRange(parsingResults);
+    }
+
+    protected void interpretShowArticleSpecifics(JSAPResult parsingResults){
+        String[] articleSpecifics = parsingResults.getStringArray("articleSpecifics");
+    }
+
+    protected void showArticleRange(JSAPResult parsingResults){
+        String[] articles = parsingResults.getStringArray("articles");
+        if (articles.length < 2){
+            System.out.println("Not enough arguments to create range.");
+        }
+        List<String> articlesToPrint = new ArrayList<>();
+        int articlesLength = articles.length;
+        if (articlesLength % 2 == 1) {
+            articlesLength--;
+        }
+        for (int i = 0; i < articlesLength; i+=2){
+            try {
+                articlesToPrint.addAll(this.getArticlesInRangeContents(articles[i], articles[i + 1]));
+            }
+            catch (IllegalArgumentException e){
+                System.out.println("Given range is not valid.");
+                return;
+            }
+        }
+        for (String article : articlesToPrint) {
+            System.out.println(article);
+        }
+        return;
+    }
 
     @Override
     public String getTableOfContents(){
@@ -14,7 +63,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
             throw new IllegalStateException("Document hasn't been parsed, yet.");
         }
 
-        Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() != null && x.getIdentifier().contains("Art. "));
+        Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() != null && x.getIdentifier().contains("Rozdział"));
         return appendList(fragment.getTableOfContentsWithEndingPredicate(2, terminalPredicate));
     }
 
@@ -219,4 +268,18 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
         return getPartsContents(points);
     }
     //</editor-fold>
+
+    public static DocumentType checkDocumentType(List<String> documentLines){
+        for (String line : documentLines){
+            if (line.matches("KONSTYTUCJA")){
+                return DocumentType.Constitution;
+            }
+        }
+        for (String line : documentLines){
+            if (line.matches("USTAWA")){
+                return DocumentType.Bill;
+            }
+        }
+        return DocumentType.Unknown;
+    }
 }

@@ -3,16 +3,63 @@ package DocumentSystem;
 import Cleaner.*;
 import DocumentRepresentation.*;
 import Parser.*;
+import com.martiansoftware.jsap.JSAPResult;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
 public class ConstitutionDocumentSystem extends PolishDocumentSystem {
+    public void interpret(JSAPResult parsingResults){
+        boolean showTableOfContents = parsingResults.getBoolean("showTableOfContents");
+        if (showTableOfContents){
+            interpretTableOfContents(parsingResults);
+        }
+        else {
+            interpretShowChapter(parsingResults);
+        }
+    }
+
+    private void interpretTableOfContents(JSAPResult parsingResults){
+        String chapter = parsingResults.getString("chapter");
+        if (chapter == null){
+            System.out.println(this.getTableOfContents());
+        }
+        else {
+            try {
+                System.out.println(this.getChapterTableOfContents(chapter));
+            }
+            catch (IllegalArgumentException e){
+                System.out.println("No such chapter.");
+                return;
+            }
+        }
+    }
+
+    private void interpretShowChapter(JSAPResult parsingResults) {
+        String chapterNumber = parsingResults.getString("chapter");
+        if (chapterNumber == null){
+            interpretShowArticleRange(parsingResults);
+        }
+        else System.out.println(this.getChapterContent(chapterNumber));
+    }
 
     public ConstitutionDocumentSystem(String filepath) throws  IOException{
         super();
         fillCleanerRules();
         fillConstitutionParser();
         readDocument(filepath);
+        cleaner.clearDocument(billDocument);
+        cleaner.connectBrokenWords(billDocument);
+        parser.parseDocument(billDocument);
+    }
+
+    public ConstitutionDocumentSystem(List<String> fileLines){
+        super();
+        fillCleanerRules();
+        fillConstitutionParser();
+        readDocument(fileLines);
         cleaner.clearDocument(billDocument);
         cleaner.connectBrokenWords(billDocument);
         parser.parseDocument(billDocument);
@@ -44,8 +91,8 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         parser.addParserRule(rozdzial);
     }
 
-    private BillFragment getChapter(int chapterNumber){
-        String chapterIdentifier = "Rozdział " + getRomanNumber(Integer.toString(chapterNumber));
+    private BillFragment getChapter(String chapterNumber){
+        String chapterIdentifier = "Rozdział " + getRomanNumber(chapterNumber);
 
         BillFragment chapter = billDocument.getBillFragment().findFirstFragmentWithIdentifier(chapterIdentifier);
         if (chapter == null){
@@ -55,7 +102,7 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         return chapter;
     }
 
-    public String getChapterContent(int chapterNumber) {
+    public String getChapterContent(String chapterNumber) {
         BillFragment chapter;
         try {
             chapter = getChapter(chapterNumber);
@@ -67,14 +114,15 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         return chapter.getFragmentContentWithChildren();
     }
 
-    public String getChapterTableOfContents(int chapterNumber){
+    public String getChapterTableOfContents(String chapterNumber){
         BillFragment chapter;
+        Predicate<BillFragment> articlePredicate = (BillFragment x) -> !(x.getIdentifier() == null) && x.getIdentifier().contains("Art.");
         try {
             chapter = getChapter(chapterNumber);
         }
         catch (IllegalArgumentException e){
             throw new IllegalArgumentException("Couldn't get table of contents. " + e);
         }
-        return appendList(chapter.getTableOfContents(2));
+        return appendList(chapter.getTableOfContentsWithEndingPredicate(2, articlePredicate));
     }
 }

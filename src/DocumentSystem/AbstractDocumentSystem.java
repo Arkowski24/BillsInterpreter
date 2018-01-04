@@ -3,6 +3,7 @@ package DocumentSystem;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
@@ -11,6 +12,7 @@ import DocumentRepresentation.*;
 import Parser.*;
 import Cleaner.*;
 import com.frequal.romannumerals.Converter;
+import com.martiansoftware.jsap.JSAPResult;
 
 public abstract class AbstractDocumentSystem {
     protected Cleaner cleaner;
@@ -22,8 +24,10 @@ public abstract class AbstractDocumentSystem {
         parser = new Parser();
     }
 
+    public abstract void interpret(JSAPResult parsingResults);
+
     //<editor-fold desc="Read document methods">
-    protected List<String> readFile(String filepath) throws IOException {
+    public static List<String> readFile(String filepath) throws IOException {
         List<String> documentLines = new ArrayList<>();
 
         try (BufferedReader documentReader = new BufferedReader(new FileReader (filepath))){
@@ -51,6 +55,11 @@ public abstract class AbstractDocumentSystem {
         }
         BillDocument billDocument = new BillDocument(documentLines);
 
+        this.billDocument = billDocument;
+    }
+
+    protected void readDocument(List<String> fileLines){
+        BillDocument billDocument = new BillDocument(fileLines);
         this.billDocument = billDocument;
     }
 
@@ -180,11 +189,45 @@ public abstract class AbstractDocumentSystem {
     }
 
     protected String getRomanNumber(String number){
+        if (isRomanNumber(number)){
+            return formRomanNumber(number);
+        }
+        else {
+            return getRomanFromArabNumber(number);
+        }
+    }
+
+    private String getRomanFromArabNumber(String number){
         Converter romanConverter = new Converter();
         String digitPart = number.replaceAll("\\D+", "");
         String lettersPart = number.replaceAll("\\d+", "");
+        String romanPart;
+        try {
+            int arabNumber = Integer.parseInt(digitPart);
+            romanPart = romanConverter.toRomanNumerals(arabNumber);
+        }
+        catch (NumberFormatException e){
+            throw new IllegalArgumentException("Couldn't create Roman Number.");
+        }
+        return romanPart + lettersPart;
+    }
 
-        int numberFromDigits = Integer.parseInt(digitPart);
-        return romanConverter.toRomanNumerals(numberFromDigits) + lettersPart;
+    protected boolean isRomanNumber(String number){
+        Converter romanConverter = new Converter();
+        String digitPart = number.replaceAll("[^MDCLXVI]+", "");
+        try {
+            romanConverter.toNumber(digitPart);
+        }
+        catch (ParseException e){
+            return false;
+        }
+        return true;
+    }
+
+    private String formRomanNumber(String number){
+        String letterPart = number.replaceAll("[MDCLXVI]+", "");
+        String digitPart = number.replaceAll("[^MDCLXVI]+", "");
+
+        return letterPart + digitPart;
     }
 }

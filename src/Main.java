@@ -1,39 +1,107 @@
+import DocumentRepresentation.BillDocument;
+import DocumentSystem.AbstractDocumentSystem;
 import DocumentSystem.ConstitutionDocumentSystem;
 import DocumentSystem.ConsumersBillDocumentSystem;
+import DocumentSystem.PolishDocumentSystem;
+import com.martiansoftware.jsap.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.jar.JarException;
 
 public class Main {
 
     public static void main(String[] args) {
-        ConstitutionDocumentSystem documentSystem;
-        ConsumersBillDocumentSystem documentSystem1;
-        try {
-            documentSystem = new ConstitutionDocumentSystem("konstytucja.txt");
-            documentSystem1 = new ConsumersBillDocumentSystem("uokik.txt");
+        JSAP jsap = new JSAP();
+        JSAPResult results;
+        try{
+            fillOptionsForJsapParser(jsap);
         }
-        catch (IOException e){
-            System.out.println("Couldn't read document.");
+        catch (JSAPException e){
+            System.out.println("Couldn't add options to parser.");
             return;
         }
-        //System.out.print(documentSystem.getTableOfContents());
-        //System.out.print(documentSystem.getArticle("5"));
-        System.out.print(documentSystem.getChapterContent(1));
-        System.out.print(documentSystem.getChapterContent(1));
-        //System.out.print(documentSystem.getParagraphContent(25, 2));
-        //System.out.print(documentSystem1.getTableOfContents());
-        List<String> articles = documentSystem.getArticlesInRangeContents("145", "151");
-        for (String article : articles){
-            System.out.print(article);
+        try {
+            results = jsap.parse(args);
         }
-        List<String> paragraphs = documentSystem.getParagraphsInRangeContents("149","2", "3");
-        for (String paragraph : paragraphs){
-            System.out.print(paragraph);
+        catch (Exception e){
+            System.out.println("Couldn't parse given options.");
+            return;
         }
-        List<String> points = documentSystem.getPointsInRangeContents("242", "1", "2");
-        for (String point : points){
-            System.out.print(point);
+        String filePath = results.getString("filepath");
+        List<String> fileLines;
+        try {
+            fileLines = AbstractDocumentSystem.readFile(filePath);
         }
+        catch (IOException e){
+            System.out.println("Couldn't read file.");
+            return;
+        }
+        switch (PolishDocumentSystem.checkDocumentType(fileLines)){
+            case Constitution:
+                interpretConstitution(fileLines, results);
+                break;
+            case Bill:
+                interpretBill(fileLines, results);
+                break;
+
+        }
+    }
+
+    private static void fillOptionsForJsapParser(JSAP parser) throws JSAPException{
+        UnflaggedOption fileOption = new UnflaggedOption("filepath")
+                .setStringParser(JSAP.STRING_PARSER)
+                .setRequired(true);
+
+        Switch modeOption = new Switch("showTableOfContents")
+                                .setShortFlag('T')
+                                .setLongFlag("table-of-contents");
+
+        FlaggedOption articleOption = new FlaggedOption("article")
+                .setStringParser(JSAP.STRING_PARSER)
+                .setShortFlag('a')
+                .setLongFlag("article");
+
+        FlaggedOption articlesOption = new FlaggedOption("articles")
+                .setStringParser(JSAP.STRING_PARSER)
+                .setShortFlag('A')
+                .setLongFlag("article-range")
+                .setList(true)
+                .setListSeparator(',');
+
+        FlaggedOption chapterOption  = new FlaggedOption("chapter")
+                .setStringParser(JSAP.STRING_PARSER)
+                .setShortFlag('c')
+                .setLongFlag("chapter");
+
+        FlaggedOption sectionOption  = new FlaggedOption("section")
+                .setStringParser(JSAP.STRING_PARSER)
+                .setShortFlag('s')
+                .setLongFlag("section");
+
+        UnflaggedOption showSpecific = new UnflaggedOption("articleSpecifics")
+                                            .setGreedy(true);
+
+        try {
+            parser.registerParameter(fileOption);
+            parser.registerParameter(modeOption);
+            parser.registerParameter(articleOption);
+            parser.registerParameter(articlesOption);
+            parser.registerParameter(chapterOption);
+            parser.registerParameter(sectionOption);
+            parser.registerParameter(showSpecific);
+        }
+        catch (JSAPException e){
+            throw new JSAPException("Couldn't add options.");
+        }
+    }
+
+    private static void interpretConstitution(List<String> fileLines, JSAPResult parsingResults){
+        ConstitutionDocumentSystem constitutionDocumentSystem = new ConstitutionDocumentSystem(fileLines);
+        constitutionDocumentSystem.interpret(parsingResults);
+    }
+
+    private static void interpretBill(List<String> fileLines, JSAPResult parsingResults){
+        ConsumersBillDocumentSystem consumersBillDocumentSystem = new ConsumersBillDocumentSystem(fileLines);
     }
 }

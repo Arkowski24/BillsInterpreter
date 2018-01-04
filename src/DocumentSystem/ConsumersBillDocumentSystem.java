@@ -3,18 +3,79 @@ package DocumentSystem;
 import Cleaner.*;
 import DocumentRepresentation.BillFragment;
 import Parser.*;
+import com.martiansoftware.jsap.JSAPResult;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Predicate;
 
 public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
+    public void interpret(JSAPResult parsingResults){
+        boolean showTableOfContents = parsingResults.getBoolean("showTableOfContents");
+        if (showTableOfContents){
+            interpretTableOfContents(parsingResults);
+        }
+        else {
+            interpretShowSection(parsingResults);
+        }
+    }
+
+    private void interpretTableOfContents(JSAPResult parsingResults){
+        String section = parsingResults.getString("section");
+        if (section == null){
+            System.out.println(this.getTableOfContents());
+        }
+        else {
+            try {
+                System.out.println(this.getSectionTableOfContents(section));
+            }
+            catch (IllegalArgumentException e){
+                System.out.println("No such section.");
+                return;
+            }
+        }
+    }
+
+    private void interpretShowSection(JSAPResult parsingResults) {
+        String sectionNumber = parsingResults.getString("section");
+        String chapterNumber = parsingResults.getString("chapter");
+        if (sectionNumber == null){
+            interpretShowArticleRange(parsingResults);
+        }
+        else if (chapterNumber == null){
+            try {
+                System.out.println(this.getSectionContent(sectionNumber));
+            }
+            catch(IllegalArgumentException e){
+                System.out.println("No such section.");
+            }
+        }
+        else {
+            try {
+                System.out.println(this.getChapterContent(sectionNumber, chapterNumber));
+            }
+            catch(IllegalArgumentException e){
+                System.out.println("No such section or chapter.");
+            }
+        }
+    }
+
     public ConsumersBillDocumentSystem(String filepath) throws IOException {
         super();
         readDocument(filepath);
         fillCleanerRules();
         fillConsumersParser();
         cleaner.clearDocument(billDocument);
+        parser.parseDocument(billDocument);
+    }
+
+    public ConsumersBillDocumentSystem(List<String> fileLines){
+        super();
+        fillCleanerRules();
+        fillConsumersParser();
+        readDocument(fileLines);
+        cleaner.clearDocument(billDocument);
+        cleaner.connectBrokenWords(billDocument);
         parser.parseDocument(billDocument);
     }
 
@@ -146,7 +207,31 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
             throw new IllegalArgumentException("Couldn't get table of contents.");
         }
 
-        Predicate<BillFragment> articleEnding = (BillFragment x) -> x.getIdentifier() != null && x.getIdentifier().contains("Art. ");
+        Predicate<BillFragment> articleEnding = (BillFragment x) -> x.getIdentifier() != null && x.getIdentifier().contains("Rozdział");
         return section.getTableOfContentsWithEndingPredicate(2, articleEnding);
+    }
+
+    public String getSectionContent(String sectionNumber) {
+        BillFragment section;
+        try {
+            section = getSection(sectionNumber);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't get content. " + e);
+        }
+
+        return section.getFragmentContentWithChildren();
+    }
+
+    public String getChapterContent(String sectionNumber, String chapterNumber) {
+        BillFragment chapter;
+        try {
+            chapter = getChapter(sectionNumber, chapterNumber);
+        }
+        catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Couldn't get content. " + e);
+        }
+
+        return chapter.getFragmentContentWithChildren();
     }
 }
