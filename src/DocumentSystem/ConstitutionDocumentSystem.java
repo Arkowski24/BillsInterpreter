@@ -128,7 +128,7 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
             throw new IllegalStateException("Document hasn't been parsed, yet.");
         }
 
-        Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() != null && x.getIdentifier().matches("[A-Z\\W]+"));
+        Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() == null || x.getIdentifier().matches("[\\WA-Z]+") || x.getIdentifier().contains("Rozdział"));
         Predicate<String> contentPredicate = (String x) -> x != null && x.replaceAll(".", "").length() == 0;
         return appendList(fragment.getTableOfContentsWithEndingPredicateAndContentPredicate(2, terminalPredicate, contentPredicate));
     }
@@ -158,13 +158,14 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
 
     public String getChapterTableOfContents(String chapterNumber){
         BillFragment chapter;
-        Predicate<BillFragment> articlePredicate = (BillFragment x) -> !(x.getIdentifier() == null) && x.getIdentifier().contains("Art.");
         try {
             chapter = getChapter(chapterNumber);
         }
         catch (IllegalArgumentException e){
             throw new IllegalArgumentException("Couldn't get table of contents. " + e);
         }
-        return appendList(chapter.getTableOfContentsWithEndingPredicate(2, articlePredicate));
+        Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() != null && (x.getIdentifier().matches("[A-Z\\W]+") || x.getIdentifier().contains("Rozdział")));
+        Predicate<String> contentPredicate = (String x) -> x != null && x.replaceAll(".", "").length() == 0;
+        return appendList(chapter.getTableOfContentsWithEndingPredicateAndContentPredicate(2, terminalPredicate, contentPredicate));
     }
 }
