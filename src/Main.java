@@ -26,7 +26,17 @@ public class Main {
         }
         catch (Exception e){
             System.err.println("Couldn't parse given options.");
+            System.err.println();
             System.err.println(jsap.getUsage());
+            System.err.println();
+            System.err.println(jsap.getHelp());
+            return;
+        }
+        if (results.getBoolean("showHelp")){
+            System.out.println();
+            System.out.println(jsap.getUsage());
+            System.out.println();
+            System.out.println(jsap.getHelp());
             return;
         }
         String filePath = results.getString("filepath");
@@ -58,18 +68,26 @@ public class Main {
                 .setShortFlag('h')
                 .setLongFlag("help");
 
+        helpOption.setHelp("Show help.");
+
         UnflaggedOption fileOption = new UnflaggedOption("filepath")
                 .setStringParser(JSAP.STRING_PARSER)
                 .setRequired(true);
+
+        fileOption.setHelp("Open file specified by given filepath. The type of document (Constitution|Bill) is detected automatically.");
 
         Switch modeOption = new Switch("showTableOfContents")
                                 .setShortFlag('T')
                                 .setLongFlag("table-of-contents");
 
-        FlaggedOption articleOption = new FlaggedOption("article")
+        modeOption.setHelp("Specify whether the program should display table of content instead of bill's content. If section is specified it's table of contents will be displayed instead.");
+
+        FlaggedOption articleOption = new FlaggedOption("articleNumber")
                 .setStringParser(JSAP.STRING_PARSER)
                 .setShortFlag('a')
                 .setLongFlag("article");
+
+        articleOption.setHelp("Show article with specified number.");
 
         FlaggedOption articlesOption = new FlaggedOption("articles")
                 .setStringParser(JSAP.STRING_PARSER)
@@ -78,20 +96,29 @@ public class Main {
                 .setList(true)
                 .setListSeparator(',');
 
+        articlesOption.setHelp("Show articles within specified ranges. Two consecutive numbers create range. If the number of articles is odd, the last one is ignored.");
+
         FlaggedOption chapterOption  = new FlaggedOption("chapter")
                 .setStringParser(JSAP.STRING_PARSER)
                 .setShortFlag('c')
                 .setLongFlag("chapter");
+
+        chapterOption.setHelp("Show chapter with specified number. For Bill type document section number is also required.");
 
         FlaggedOption sectionOption  = new FlaggedOption("section")
                 .setStringParser(JSAP.STRING_PARSER)
                 .setShortFlag('s')
                 .setLongFlag("section");
 
+        sectionOption.setHelp("Show section with specified number.");
+
         UnflaggedOption showSpecific = new UnflaggedOption("articleSpecifics")
                                             .setGreedy(true);
 
+        showSpecific.setHelp("Show specified part of article. Only the first valid rule for each element (article, paragraph, etc.) is considered.");
+
         try {
+            parser.registerParameter(helpOption);
             parser.registerParameter(fileOption);
             parser.registerParameter(modeOption);
             parser.registerParameter(articleOption);

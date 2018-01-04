@@ -25,7 +25,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
     }
 
     protected void interpretShowArticle(JSAPResult parsingResults){
-        String articleNumber = parsingResults.getString("article");
+        String articleNumber = parsingResults.getString("articleNumber");
         if (articleNumber == null){
             interpretShowArticleSpecifics(parsingResults);
         }
@@ -69,7 +69,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
     }
 
     private void showArticle(JSAPResult parsingResults){
-        String articleNumber = parsingResults.getString("article");
+        String articleNumber = parsingResults.getString("articleNumber");
         try {
             System.out.println(getArticleContent(articleNumber));
         }
