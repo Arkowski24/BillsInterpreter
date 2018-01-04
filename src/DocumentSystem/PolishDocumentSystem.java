@@ -17,7 +17,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
 
     protected void interpretShowArticleRange(JSAPResult parsingResults) {
         String[] articlesNumbers = parsingResults.getStringArray("articles");
-        if (articlesNumbers == null ){
+        if (articlesNumbers == null || articlesNumbers.length == 0){
             interpretShowArticle(parsingResults);
         }
         else showArticleRange(parsingResults);
@@ -28,7 +28,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
         if (articleNumber == null ){
             interpretShowArticleSpecifics(parsingResults);
         }
-        else showArticleRange(parsingResults);
+        else showArticle(parsingResults);
     }
 
     protected void interpretShowArticleSpecifics(JSAPResult parsingResults){
@@ -58,6 +58,17 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
             System.out.println(article);
         }
         return;
+    }
+
+    protected void showArticle(JSAPResult parsingResults){
+        String articleNumber = parsingResults.getString("article");
+        try {
+            System.out.println(getArticleContent(articleNumber));
+        }
+        catch (IllegalArgumentException e){
+            System.out.println("No such article.");
+            return;
+        }
     }
 
     @Override
