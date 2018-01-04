@@ -157,10 +157,14 @@ public class BillFragment {
 
     public String getFragmentContentWithChildren(){
         String contents = "";
-        contents += this.identifier;
-        contents += " ";
-        contents += this.content;
-        contents += "\n";
+        if (identifier != null){
+            contents += this.identifier;
+            contents += " ";
+        }
+        if (content != null){
+            contents += this.content;
+            contents += "\n";
+        }
 
         for (BillFragment child : this.children){
             String childContents = child.getFragmentContentWithChildren();

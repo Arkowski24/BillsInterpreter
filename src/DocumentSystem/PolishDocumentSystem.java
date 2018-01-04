@@ -5,6 +5,7 @@ import DocumentRepresentation.DocumentType;
 import com.martiansoftware.jsap.JSAPResult;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -25,7 +26,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
 
     protected void interpretShowArticle(JSAPResult parsingResults){
         String articleNumber = parsingResults.getString("article");
-        if (articleNumber == null ){
+        if (articleNumber == null){
             interpretShowArticleSpecifics(parsingResults);
         }
         else showArticle(parsingResults);
@@ -33,9 +34,16 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
 
     protected void interpretShowArticleSpecifics(JSAPResult parsingResults){
         String[] articleSpecifics = parsingResults.getStringArray("articleSpecifics");
+        if (articleSpecifics == null || articleSpecifics.length == 0){
+            //Show full document
+            System.out.println(this.billDocument.getBillFragment().getFragmentContentWithChildren());
+        }
+        else {
+            ShowArticleSpecifics(parsingResults);
+        }
     }
 
-    protected void showArticleRange(JSAPResult parsingResults){
+    private void showArticleRange(JSAPResult parsingResults){
         String[] articles = parsingResults.getStringArray("articles");
         if (articles.length < 2){
             System.out.println("Not enough arguments to create range.");
@@ -60,7 +68,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
         return;
     }
 
-    protected void showArticle(JSAPResult parsingResults){
+    private void showArticle(JSAPResult parsingResults){
         String articleNumber = parsingResults.getString("article");
         try {
             System.out.println(getArticleContent(articleNumber));
@@ -69,6 +77,10 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
             System.out.println("No such article.");
             return;
         }
+    }
+
+    private void ShowArticleSpecifics(JSAPResult parsingResults){
+
     }
 
     @Override
