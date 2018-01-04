@@ -57,15 +57,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
     }
 
     @Override
-    public String getTableOfContents(){
-        BillFragment fragment = billDocument.getBillFragment();
-        if (fragment == null){
-            throw new IllegalStateException("Document hasn't been parsed, yet.");
-        }
-
-        Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() != null && x.getIdentifier().contains("Rozdział"));
-        return appendList(fragment.getTableOfContentsWithEndingPredicate(2, terminalPredicate));
-    }
+    public abstract String getTableOfContents();
 
     //<editor-fold desc="Document fragment retrievers">
     public BillFragment getArticle(String articleNumber){

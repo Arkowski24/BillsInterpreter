@@ -53,6 +53,7 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         cleaner.clearDocument(billDocument);
         cleaner.connectBrokenWords(billDocument);
         parser.parseDocument(billDocument);
+        fixPreamble();
     }
 
     public ConstitutionDocumentSystem(List<String> fileLines){
@@ -63,6 +64,7 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         cleaner.clearDocument(billDocument);
         cleaner.connectBrokenWords(billDocument);
         parser.parseDocument(billDocument);
+        fixPreamble();
     }
 
     private void fillCleanerRules(){
@@ -81,14 +83,39 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         ParserRule artykul = new ParserRule("(Art.\\s[0-9]{3}[a-z]{1}\\.)|(Art.\\s[0-9]{3}\\.)" +
                 "|(Art.\\s[0-9]{2}[a-z]{1}\\.)|(Art.\\s[0-9]{2}\\.)" +
                 "|(Art.\\s[0-9]{1}[a-z]{1}\\.)|(Art.\\s[0-9]{1}\\.)", ParserRuleType.Unlimited);
+        ParserRule tytul = new ParserRule("(?m)^[A-Z\\W]+$", ParserRuleType.Unlimited);
         ParserRule rozdzial = new ParserRule("(Rozdział [LCDMIVX]{4})|(Rozdział [LCDMIVX]{3})|(Rozdział [LCDMIVX]{2})|(Rozdział [LCDMIVX])", ParserRuleType.Unlimited);
+        ParserRule preambula = new ParserRule("(Preambula)|(z dnia 2 kwietnia 1997 r.)", ParserRuleType.Limited, 1);
 
         ustep.addSubRule(punkt);
         artykul.addSubRule(ustep);
         artykul.addSubRule(punkt2);
-        rozdzial.addSubRule(artykul);
-
+        tytul.addSubRule(artykul);
+        rozdzial.addSubRule(tytul);
+        parser.addParserRule(preambula);
         parser.addParserRule(rozdzial);
+    }
+
+    private void fixPreamble(){
+        BillFragment preamble = billDocument.getBillFragment().findFirstFragmentWithIdentifier("z dnia 2 kwietnia 1997 r.");
+        if (preamble == null){
+            return;
+        }
+        else {
+            preamble.setIdentifier("Preambuła");
+        }
+    }
+
+    @Override
+    public String getTableOfContents(){
+        BillFragment fragment = billDocument.getBillFragment();
+        if (fragment == null){
+            throw new IllegalStateException("Document hasn't been parsed, yet.");
+        }
+
+        Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() != null && x.getIdentifier().matches("[A-Z\\W]+"));
+        Predicate<String> contentPredicate = (String x) -> x != null && x.replaceAll(".", "").length() == 0;
+        return appendList(fragment.getTableOfContentsWithEndingPredicateAndContentPredicate(2, terminalPredicate, contentPredicate));
     }
 
     private BillFragment getChapter(String chapterNumber){

@@ -120,6 +120,17 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         parser.addParserRule(dzial);
     }
 
+    public String getTableOfContents(){
+        BillFragment fragment = billDocument.getBillFragment();
+        if (fragment == null){
+            throw new IllegalStateException("Document hasn't been parsed, yet.");
+        }
+
+        Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() == null || x.getIdentifier().contains("Rozdział") || x.getIdentifier().contains("DZIAŁ"));
+        Predicate<String> contentPredicate = (String x) -> x != null && x.replaceAll("([A-Z]+)|(\\W)+", "").length() < x.length();
+        return appendList(fragment.getTableOfContentsWithEndingPredicateAndContentPredicate(2, terminalPredicate, contentPredicate));
+    }
+
     public BillFragment getSection(String sectionNumber){
         String sectionIdentifier = "DZIAŁ " + getRomanNumber(sectionNumber);
 

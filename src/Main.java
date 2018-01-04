@@ -103,5 +103,6 @@ public class Main {
 
     private static void interpretBill(List<String> fileLines, JSAPResult parsingResults){
         ConsumersBillDocumentSystem consumersBillDocumentSystem = new ConsumersBillDocumentSystem(fileLines);
+        consumersBillDocumentSystem.interpret(parsingResults);
     }
 }

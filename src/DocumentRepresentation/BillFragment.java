@@ -1,6 +1,7 @@
 package DocumentRepresentation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -67,16 +68,27 @@ public class BillFragment {
 
     //<editor-fold desc="Table Of Contents">
     public List<String> getTableOfContentsWithEndingPredicate(int indentSize, Predicate<BillFragment> endSubtreePredicate){
-        List<String> tableOfContents = new ArrayList<>();
-        String indent = getSpacesForIndent(indentSize);
-        tableOfContents.add(identifier);
+        return getTableOfContentsWithEndingPredicateAndContentPredicate(indentSize, endSubtreePredicate, (x) -> true);
+    }
 
-        if (!endSubtreePredicate.test(this)) {
-            for (BillFragment child : children) {
-                List<String> childTableOfContents = child.getTableOfContentsWithEndingPredicate(indentSize, endSubtreePredicate);
-                for (String childToC : childTableOfContents) {
-                    tableOfContents.add(indent + childToC);
-                }
+    public List<String> getTableOfContentsWithEndingPredicateAndContentPredicate(int indentSize, Predicate<BillFragment> traverseSubtree, Predicate<String> subContentPredicate){
+        List<String> tableOfContents = new ArrayList<>();
+        if (!traverseSubtree.test(this)){
+            return tableOfContents;
+        }
+
+        String indent = getSpacesForIndent(indentSize);
+        if (identifier != null){
+            tableOfContents.addAll(Arrays.asList(identifier.split("\n")));
+        }
+        if (subContentPredicate.test(content)){
+            tableOfContents.add(content);
+        }
+
+        for (BillFragment child : children) {
+            List<String> childTableOfContents = child.getTableOfContentsWithEndingPredicateAndContentPredicate(indentSize, traverseSubtree, subContentPredicate);
+            for (String childToC : childTableOfContents) {
+                tableOfContents.add(indent + childToC);
             }
         }
         return tableOfContents;
@@ -144,21 +156,17 @@ public class BillFragment {
     }
 
     public String getFragmentContentWithChildren(){
-        return getFragmentContentWithChildren((x) -> false);
-    }
-
-    public String getFragmentContentWithChildren(Predicate<BillFragment> endingPredicate){
         String contents = "";
         contents += this.identifier;
         contents += " ";
         contents += this.content;
         contents += "\n";
-        if (!endingPredicate.test(this)) {
-            for (BillFragment child : this.children) {
-                String childContents = child.getFragmentContentWithChildren();
-                contents += childContents;
-            }
+
+        for (BillFragment child : this.children){
+            String childContents = child.getFragmentContentWithChildren();
+            contents += childContents;
         }
+
         return contents;
     }
     //</editor-fold>
