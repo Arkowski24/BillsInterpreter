@@ -56,7 +56,9 @@ public class Main {
             case Bill:
                 interpretBill(fileLines, results);
                 break;
-
+            case Unknown:
+                System.err.println("Couldn't detect document type.");
+                break;
         }
     }
 
