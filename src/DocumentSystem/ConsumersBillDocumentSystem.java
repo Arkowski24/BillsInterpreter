@@ -59,7 +59,11 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         String sectionNumber = parsingResults.getString("section");
         String chapterNumber = parsingResults.getString("chapter");
         if (sectionNumber == null) {
-            interpretShowArticleRange(parsingResults);
+            if (chapterNumber == null) {
+                interpretShowArticleRange(parsingResults);
+            } else {
+                System.err.println("Section numer required.");
+            }
         } else if (chapterNumber == null) {
             try {
                 System.out.println(this.getSectionContent(sectionNumber));
