@@ -1,9 +1,10 @@
 package Cleaner;
 
-import DocumentRepresentation.*;
+import DocumentRepresentation.BillDocument;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -19,10 +20,10 @@ public class Cleaner {
         cleanerRules.add(cleanerRule);
     }
 
-    public void clearDocument(BillDocument billDocument){
+    public void clearDocument(BillDocument billDocument) {
         List<String> documentLines = billDocument.getBillDocumentLines();
-        for (CleanerRule cleanerRule : cleanerRules){
-            switch (cleanerRule.cleanerRuleType){
+        for (CleanerRule cleanerRule : cleanerRules) {
+            switch (cleanerRule.cleanerRuleType) {
                 case DeleteLineWithPhrase:
                     documentLines = deleteLineRule(cleanerRule.regexPattern, documentLines);
                     break;
@@ -34,48 +35,43 @@ public class Cleaner {
         billDocument.setBillDocumentLines(documentLines);
     }
 
-    public void connectBrokenWords(BillDocument billDocument){
+    public void connectBrokenWords(BillDocument billDocument) {
         Pattern brokenLinePattern = Pattern.compile(".+-$");
         List<String> billDocumentLines = billDocument.getBillDocumentLines();
 
-        for (Integer i = 0; i < billDocumentLines.size(); i++){
+        for (Integer i = 0; i < billDocumentLines.size(); i++) {
             Matcher matcher = brokenLinePattern.matcher(billDocumentLines.get(i));
-            if(matcher.matches()){
+            if (matcher.matches()) {
                 connectBrokenWord(billDocumentLines, i);
             }
         }
 
-        for (Integer i = 0; i < billDocumentLines.size(); i++) {
-            if(billDocumentLines.get(i) == null)
-                billDocumentLines.remove(i);
-        }
+        while (billDocumentLines.remove(null)) ;
     }
 
-    private List<String>  deleteLineRule(Pattern rulePattern, List<String> documentLines){
-        List<String> newDocumentLines = documentLines.stream()
+    private List<String> deleteLineRule(Pattern rulePattern, List<String> documentLines) {
+        return documentLines.stream()
                 .filter((String s) -> notContainsPattern(s, rulePattern))
                 .collect(Collectors.toList());
-        return newDocumentLines;
     }
 
-    private List<String> deletePhrase(Pattern rulePattern, List<String> documentLines){
-        List<String> newDocumentLines = documentLines.stream()
+    private List<String> deletePhrase(Pattern rulePattern, List<String> documentLines) {
+        return documentLines.stream()
                 .map((String s) -> deletePhraseFromLine(s, rulePattern))
-                .filter((String s) -> s != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        return newDocumentLines;
     }
 
-    private boolean notContainsPattern(String line, Pattern pattern){
+    private boolean notContainsPattern(String line, Pattern pattern) {
         return !containsPattern(line, pattern);
     }
 
-    private boolean containsPattern(String line, Pattern pattern){
+    private boolean containsPattern(String line, Pattern pattern) {
         Matcher matcher = pattern.matcher(line);
         return matcher.find();
     }
 
-    private String deletePhraseFromLine(String line, Pattern pattern){
+    private String deletePhraseFromLine(String line, Pattern pattern) {
         Matcher matcher = pattern.matcher(line);
         String newLine = matcher.replaceAll("");
         if (newLine.length() == 0) {
@@ -84,8 +80,8 @@ public class Cleaner {
         return newLine;
     }
 
-    private void connectBrokenWord(List<String> billDocumentLines, int lineOfWordNumber){
-        if (lineOfWordNumber == billDocumentLines.size() - 1){
+    private void connectBrokenWord(List<String> billDocumentLines, int lineOfWordNumber) {
+        if (lineOfWordNumber == billDocumentLines.size() - 1) {
             return;
         }
 
@@ -98,10 +94,9 @@ public class Cleaner {
         String newFirstLine;
         String newSecondLine;
 
-        if(firstHalfPositionStart == 0){
+        if (firstHalfPositionStart == 0) {
             newFirstLine = null;
-        }
-        else {
+        } else {
             newFirstLine = firstHalfLine.substring(0, firstHalfPositionStart - 1);
         }
         newSecondLine = firstHalfLine.substring(firstHalfPositionStart, firstHalfPositionFinish) + secondHalfLine;
