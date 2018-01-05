@@ -129,7 +129,10 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
                 "|(Art.\\s[0-9]{3}[a-z]{2}\\.)|(Art.\\s[0-9]{2}[a-z]{1}\\.)|(Art.\\s[0-9]{2}\\.)" +
                 "|(Art.\\s[0-9]{3}[a-z]{2}\\.)|(Art.\\s[0-9]{1}[a-z]{1}\\.)|(Art.\\s[0-9]{1}\\.)", ParserRuleType.NoMatch);
         ParserRule rozdzial = new ParserRule("(Rozdział [0-9]{4})|(Rozdział [0-9]{3})|(Rozdział [0-9]{2})|(Rozdział [0-9])", ParserRuleType.Unlimited);
-        ParserRule dzial = new ParserRule("(DZIAŁ [LCDMIVX]{4})|(DZIAŁ [LCDMIVX]{3})|(DZIAŁ [LCDMIVX]{2})|(DZIAŁ [LCDMIVX])", ParserRuleType.Unlimited);
+        ParserRule dzial = new ParserRule("(DZIAŁ [LCDMIVX]{4}[A-Z]{1})|(DZIAŁ [LCDMIVX]{4})" +
+                "|(DZIAŁ [LCDMIVX]{3}[A-Z]{1})|(DZIAŁ [LCDMIVX]{3})" +
+                "|(DZIAŁ [LCDMIVX]{2}[A-Z]{1})|(DZIAŁ [LCDMIVX]{2})" +
+                "|(DZIAŁ [LCDMIVX]{1}[A-Z]{1})|(DZIAŁ [LCDMIVX]{1})", ParserRuleType.Unlimited);
 
         punkt.addSubRule(litera);
         punkt2.addSubRule(litera);

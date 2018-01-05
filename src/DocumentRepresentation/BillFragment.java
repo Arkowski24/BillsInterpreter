@@ -161,7 +161,7 @@ public class BillFragment {
         }
         if (content != null) {
             contents.append(this.content);
-            contents.append(" ");
+            contents.append("\n");
         }
 
         for (BillFragment child : this.children) {
