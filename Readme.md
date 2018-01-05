@@ -1,7 +1,7 @@
 # Projekt 1 - Programowanie Obiektowe
 
-Projekt wykorzystuje 2 biblioteki zewnętrzne (OpenSource):
-[JSAP](http://www.martiansoftware.com/jsap/) - Parsowanie linii poleceń
+Projekt wykorzystuje 2 biblioteki zewnętrzne (OpenSource): \
+[JSAP](http://www.martiansoftware.com/jsap/) - Parsowanie linii poleceń \
 [Roman Numerals](http://frequal.com/RomanNumerals/index.html) - Konwersja liczb arabskich na rzymskie.
 
 Pliki ustaw "konstytucja.txt" i "uokik.txt" pochodzą z [lab8](https://github.com/apohllo/obiektowe-lab/tree/master/lab8).
@@ -20,11 +20,11 @@ Jeżeli obecna jest opcja (-c \<numer sekcji>) program wyświetla tylko spis tre
 Jeżeli obecne są opcje wymienione powyżej to przetwarzane są w następującym priorytecie: \
 h -> T -> s, c -> A -> a 
 
-Jeżeli brak wyżej wymienionych opcji, kolejnymi argumentami są specyficzne fragmenty artykułu. 
-* art. \<numer artykułu> 
-* ust. \<numer ustępu> 
-* pkt. \<numer punktu> 
-* lit. \<numer liter> 
+Jeżeli brak wyżej wymienionych opcji, kolejnymi argumentami są specyficzne fragmenty dokumentu: 
+* art. \<numer artykułu> - artykul (wymagany)
+* ust. \<numer ustępu> - ustęp
+* pkt. \<numer punktu> - punkt
+* lit. \<numer liter> -litera
 
 Kolejne argumenty muszą rozdzielone być przecinkami. Niewłaściwie argumenty (które nie są potrzebne do wypisania elementu) lub powtórzenia są ignorowane.
 
