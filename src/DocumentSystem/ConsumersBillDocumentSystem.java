@@ -95,9 +95,13 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
     }
 
     protected void showLetter(String letterNumber, String pointNumber, String paragraphNumber, String articleNumber) {
-        if (letterNumber != null && pointNumber != null && paragraphNumber != null && articleNumber != null) {
+        if (letterNumber != null) {
             try {
-                System.out.println(getLetter(articleNumber, paragraphNumber, pointNumber, letterNumber));
+                if (paragraphNumber == null) {
+                    System.out.println(getLetterContent(articleNumber, pointNumber, letterNumber));
+                } else {
+                    System.out.println(getLetterContent(articleNumber, paragraphNumber, pointNumber, letterNumber));
+                }
             } catch (IllegalArgumentException e) {
                 System.err.println("No such letter.");
             }
@@ -230,6 +234,21 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         return letter;
     }
 
+    public BillFragment getLetter(String articleNumber, String pointNumber, String letterNumber) {
+        BillFragment point;
+        try {
+            point = getPoint(articleNumber, pointNumber);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Couldn't find point: " + e);
+        }
+        String letterIdentifier = letterNumber + ")";
+        BillFragment letter = point.findFirstFragmentWithIdentifier(letterIdentifier);
+        if (letter == null) {
+            throw new IllegalArgumentException("Couldn't find: " + letterIdentifier);
+        }
+        return letter;
+    }
+
     public List<BillFragment> getLetterInRange(String articleNumber, String paragraphNumber, String pointNumber, String rangeStart, String rangeEnd) {
         BillFragment point;
         try {
@@ -278,5 +297,27 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         }
 
         return chapter.getFragmentContentWithChildren();
+    }
+
+    public String getLetterContent(String articleNumber, String pointNumber, String letterNumber) {
+        BillFragment letter;
+        try {
+            letter = getLetter(articleNumber, pointNumber, letterNumber);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Couldn't get content. " + e);
+        }
+
+        return letter.getFragmentContentWithChildren();
+    }
+
+    public String getLetterContent(String articleNumber, String paragraphNumber, String pointNumber, String letterNumber) {
+        BillFragment letter;
+        try {
+            letter = getLetter(articleNumber, paragraphNumber, pointNumber, letterNumber);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Couldn't get content. " + e);
+        }
+
+        return letter.getFragmentContentWithChildren();
     }
 }
