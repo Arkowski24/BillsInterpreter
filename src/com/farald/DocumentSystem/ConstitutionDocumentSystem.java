@@ -62,7 +62,13 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         String chapterNumber = parsingResults.getString("chapter");
         if (chapterNumber == null) {
             interpretShowArticleRange(parsingResults);
-        } else System.out.println(this.getChapterContent(chapterNumber));
+        } else{
+            try {
+                System.out.println(this.getChapterContent(chapterNumber));
+            } catch (IllegalArgumentException e){
+                System.err.println("No such chapter.");
+            }
+        }
     }
 
     protected void showArticleSpecifics(JSAPResult parsingResults) {
