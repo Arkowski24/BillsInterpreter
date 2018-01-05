@@ -82,7 +82,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
                 System.out.println(getLetter(articleNumber, paragraphNumber, pointNumber, letterNumber));
             }
             catch (IllegalArgumentException e){
-                System.err.println("No such paragraph.");
+                System.err.println("No such letter.");
                 return;
             }
         }
