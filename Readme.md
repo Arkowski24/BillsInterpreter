@@ -18,12 +18,12 @@ Jeżeli obecna jest opcja (-c \<numer sekcji>) program wyświetla tylko spis tre
 -a (--article) \<numer artykułu> - Program wyświetla artykuł o zadanym numerze, a potem kończy pracę.
 
 Jeżeli obecne są opcje wymienione powyżej to przetwarzane są w następującym priorytecie: \
-h -> T -> s, c -> A > a \
+h -> T -> s, c -> A > a 
 
-Jeżeli brak wyżej wymienionych opcji, kolejnymi argumentami są specyficzne fragmenty artykułu. \
-* art. \<numer artykułu> \
-* ust. \<numer ustępu> \
-* pkt. \<numer punktu> \
-* lit. \<numer liter> \
+Jeżeli brak wyżej wymienionych opcji, kolejnymi argumentami są specyficzne fragmenty artykułu. 
+* art. \<numer artykułu> 
+* ust. \<numer ustępu> 
+* pkt. \<numer punktu> 
+* lit. \<numer liter> 
 
-Kolejne argumenty muszą rozdzielone być przecinkami. Niewłaściwie argumenty lub powtórzenia są ignorowane.
+Kolejne argumenty muszą rozdzielone być przecinkami. Niewłaściwie argumenty (które nie są potrzebne do wypisania elementu) lub powtórzenia są ignorowane.
