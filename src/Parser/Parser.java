@@ -1,6 +1,8 @@
 package Parser;
 
-import DocumentRepresentation.*;
+import DocumentRepresentation.BillDocument;
+import DocumentRepresentation.BillFragment;
+import DocumentRepresentation.BillFragmentWithRules;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +32,11 @@ public class Parser {
     }
 
     private String appendContent(List<String> lines) {
-        String content = "";
+        StringBuilder builder = new StringBuilder("");
         for (String billLine : lines) {
-            content += billLine + "\n";
+            builder.append(billLine).append("\n");
         }
-        return content;
+        return builder.toString();
     }
 
     public void parseBillFragment(BillFragmentWithRules parent) {
@@ -47,14 +49,14 @@ public class Parser {
 
         List<BillFragmentWithRules> children = getChildrenFromParentContent(new BillFragmentWithRules(parsedFragment, parsingRules, 0));
         //If no children were found, try using noMatch rules
-        if (children == null){
+        if (children == null) {
             parsingRules = getNoMatchRules(parent.parserRules);
-            if(parsingRules.size() == 0){
+            if (parsingRules.size() == 0) {
                 return;
             }
 
             children = getChildrenFromParentContent(new BillFragmentWithRules(parsedFragment, parsingRules, 0));
-            if (children == null){
+            if (children == null) {
                 return;
             }
         }
@@ -67,22 +69,22 @@ public class Parser {
         }
     }
 
-    private List<ParserRule> getNormalRules(List<ParserRule> parserRules){
+    private List<ParserRule> getNormalRules(List<ParserRule> parserRules) {
         List<ParserRule> noMatchRules = new ArrayList<>();
 
-        for (ParserRule parserRule : parserRules){
-            if (parserRule.parserRuleType != ParserRuleType.NoMatch){
+        for (ParserRule parserRule : parserRules) {
+            if (parserRule.parserRuleType != ParserRuleType.NoMatch) {
                 noMatchRules.add(parserRule);
             }
         }
         return noMatchRules;
     }
 
-    private List<ParserRule> getNoMatchRules(List<ParserRule> parserRules){
+    private List<ParserRule> getNoMatchRules(List<ParserRule> parserRules) {
         List<ParserRule> noMatchRules = new ArrayList<>();
 
-        for (ParserRule parserRule : parserRules){
-            if (parserRule.parserRuleType == ParserRuleType.NoMatch){
+        for (ParserRule parserRule : parserRules) {
+            if (parserRule.parserRuleType == ParserRuleType.NoMatch) {
                 noMatchRules.add(parserRule);
             }
         }
@@ -92,7 +94,7 @@ public class Parser {
     public List<BillFragmentWithRules> getChildrenFromParentContent(BillFragmentWithRules parent) {
         //Create matcher for given parentContent using patterns from rules
         String parentContent = parent.billFragment.getContent();
-        List<ParserMatcher> matchers =  createMatcherList(parent.parserRules, parentContent);
+        List<ParserMatcher> matchers = createMatcherList(parent.parserRules, parentContent);
 
         //Find first pattern match
         for (ParserMatcher matcher : matchers) {
@@ -179,8 +181,8 @@ public class Parser {
         //Check if next match exists and move to it
         chosenMatcher.availability = chosenMatcher.matcher.find();
         //Check whether the limit is not exhausted
-        if(chosenMatcher.rule.parserRuleType == ParserRuleType.Limited
-                && chosenMatcher.timesMatched == chosenMatcher.rule.matchLimit){
+        if (chosenMatcher.rule.parserRuleType == ParserRuleType.Limited
+                && chosenMatcher.timesMatched == chosenMatcher.rule.matchLimit) {
             chosenMatcher.availability = false;
         }
     }
@@ -188,15 +190,14 @@ public class Parser {
     private Integer getEndOfContentPosition(String content, List<ParserMatcher> matchers) {
         //End of content - next rule match position or end of document
         ParserMatcher chosenMatcher = getLowestMatcher(matchers);
-        if (chosenMatcher == null){
+        if (chosenMatcher == null) {
             return content.length();
-        }
-        else {
+        } else {
             return chosenMatcher.matcher.start();
         }
     }
 
-    private String deleteWhiteCharsFromBeginningAndEnd(String content){
+    private String deleteWhiteCharsFromBeginningAndEnd(String content) {
         content = content.replaceAll("^[ \\t\\n\\r]+", "");
         content = content.replaceAll("[ \\t\\n\\r]+$", "");
         return content;

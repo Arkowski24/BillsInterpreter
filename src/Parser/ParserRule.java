@@ -22,7 +22,7 @@ public class ParserRule {
     }
 
     public ParserRule(String pattern, ParserRuleType parserRuleType) {
-        if (parserRuleType == ParserRuleType.Limited){
+        if (parserRuleType == ParserRuleType.Limited) {
             throw new IllegalArgumentException("Match limit required.");
         }
         this.pattern = Pattern.compile(pattern);
@@ -31,7 +31,7 @@ public class ParserRule {
         this.matchLimit = -1;
     }
 
-    public void addSubRule (ParserRule parserRule){
+    public void addSubRule(ParserRule parserRule) {
         subRules.add(parserRule);
     }
 

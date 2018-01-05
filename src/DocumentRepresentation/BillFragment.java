@@ -36,6 +36,10 @@ public class BillFragment {
         return content;
     }
 
+    public void setContent(String content) {
+        this.content = content;
+    }
+
     public BillFragment getParent() {
         return parent;
     }
@@ -52,12 +56,8 @@ public class BillFragment {
         this.children = children;
     }
 
-    public void addChild(BillFragment billFragment){
+    public void addChild(BillFragment billFragment) {
         children.add(billFragment);
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
     //</editor-fold>
 
@@ -67,21 +67,21 @@ public class BillFragment {
     }
 
     //<editor-fold desc="Table Of Contents">
-    public List<String> getTableOfContentsWithEndingPredicate(int indentSize, Predicate<BillFragment> endSubtreePredicate){
+    public List<String> getTableOfContentsWithEndingPredicate(int indentSize, Predicate<BillFragment> endSubtreePredicate) {
         return getTableOfContentsWithEndingPredicateAndContentPredicate(indentSize, endSubtreePredicate, (x) -> true);
     }
 
-    public List<String> getTableOfContentsWithEndingPredicateAndContentPredicate(int indentSize, Predicate<BillFragment> traverseSubtree, Predicate<String> subContentPredicate){
+    public List<String> getTableOfContentsWithEndingPredicateAndContentPredicate(int indentSize, Predicate<BillFragment> traverseSubtree, Predicate<String> subContentPredicate) {
         List<String> tableOfContents = new ArrayList<>();
-        if (!traverseSubtree.test(this)){
+        if (!traverseSubtree.test(this)) {
             return tableOfContents;
         }
 
         String indent = getSpacesForIndent(indentSize);
-        if (identifier != null){
+        if (identifier != null) {
             tableOfContents.addAll(Arrays.asList(identifier.split("\n")));
         }
-        if (subContentPredicate.test(content)){
+        if (subContentPredicate.test(content)) {
             tableOfContents.add(content);
         }
 
@@ -94,14 +94,14 @@ public class BillFragment {
         return tableOfContents;
     }
 
-    public List<String> getTableOfContents(int indentSize){
+    public List<String> getTableOfContents(int indentSize) {
         return getTableOfContentsWithEndingPredicate(indentSize, (x) -> false);
     }
 
-    private String getSpacesForIndent(int indentSize){
+    private String getSpacesForIndent(int indentSize) {
         StringBuilder stringBuilder = new StringBuilder(indentSize);
 
-        for (int i = 0; i < indentSize; i++){
+        for (int i = 0; i < indentSize; i++) {
             stringBuilder.append(" ");
         }
         return stringBuilder.toString();
@@ -109,21 +109,21 @@ public class BillFragment {
     //</editor-fold>
 
     //<editor-fold desc="Tree Operations">
-    public BillFragment findFirstFragmentSatisfyingPredicate(Predicate<BillFragment> predicate){
+    public BillFragment findFirstFragmentSatisfyingPredicate(Predicate<BillFragment> predicate) {
         List<BillFragment> fragments = findAllFragmentsSatisfyingPredicate(predicate);
-        if (fragments.size() == 0){
+        if (fragments.size() == 0) {
             throw new IllegalArgumentException("Couldn't find fragment satisfying predicate.");
         }
         return fragments.get(0);
     }
 
-    public List<BillFragment> findAllFragmentsSatisfyingPredicate(Predicate<BillFragment> predicate){
+    public List<BillFragment> findAllFragmentsSatisfyingPredicate(Predicate<BillFragment> predicate) {
         List<BillFragment> fragments = new ArrayList<>();
-        if(predicate.test(this)){
+        if (predicate.test(this)) {
             fragments.add(this);
         }
-        if (children != null){
-            for (BillFragment child : children){
+        if (children != null) {
+            for (BillFragment child : children) {
                 List<BillFragment> childList = child.findAllFragmentsSatisfyingPredicate(predicate);
                 fragments.addAll(childList);
             }
@@ -131,47 +131,45 @@ public class BillFragment {
         return fragments;
     }
 
-    public List<BillFragment> findAllFragmentsWithIdentifier(String identifier){
-        if (identifier == null){
+    public List<BillFragment> findAllFragmentsWithIdentifier(String identifier) {
+        if (identifier == null) {
             throw new IllegalArgumentException("Identifier cannot be null.");
         }
         Predicate<BillFragment> identifierChecker = (BillFragment x) -> x.identifier != null && x.identifier.equals(identifier);
         return findAllFragmentsSatisfyingPredicate(identifierChecker);
     }
 
-    public BillFragment findFirstFragmentWithIdentifier(String identifier){
+    public BillFragment findFirstFragmentWithIdentifier(String identifier) {
         List<BillFragment> fragments;
         try {
             fragments = findAllFragmentsWithIdentifier(identifier);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(e);
         }
-        if (fragments.size() == 0){
+        if (fragments.size() == 0) {
             return null;
-        }
-        else {
+        } else {
             return fragments.get(0);
         }
     }
 
-    public String getFragmentContentWithChildren(){
-        String contents = "";
-        if (identifier != null){
-            contents += this.identifier;
-            contents += " ";
+    public String getFragmentContentWithChildren() {
+        StringBuilder contents = new StringBuilder("");
+        if (identifier != null) {
+            contents.append(this.identifier);
+            contents.append(" ");
         }
-        if (content != null){
-            contents += this.content;
-            contents += "\n";
+        if (content != null) {
+            contents.append(this.content);
+            contents.append(" ");
         }
 
-        for (BillFragment child : this.children){
+        for (BillFragment child : this.children) {
             String childContents = child.getFragmentContentWithChildren();
-            contents += childContents;
+            contents.append(childContents);
         }
 
-        return contents;
+        return contents.toString();
     }
     //</editor-fold>
 }

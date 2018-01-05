@@ -1,8 +1,10 @@
 package DocumentSystem;
 
-import Cleaner.*;
+import Cleaner.CleanerRule;
+import Cleaner.CleanerRuleType;
 import DocumentRepresentation.BillFragment;
-import Parser.*;
+import Parser.ParserRule;
+import Parser.ParserRuleType;
 import com.martiansoftware.jsap.JSAPResult;
 
 import java.io.IOException;
@@ -11,86 +13,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
-    public void interpret(JSAPResult parsingResults){
-        boolean showTableOfContents = parsingResults.getBoolean("showTableOfContents");
-        if (showTableOfContents){
-            interpretTableOfContents(parsingResults);
-        }
-        else {
-            interpretShowSection(parsingResults);
-        }
-    }
-
-    private void interpretTableOfContents(JSAPResult parsingResults){
-        String section = parsingResults.getString("section");
-        if (section == null){
-            System.out.println(this.getTableOfContents());
-        }
-        else {
-            try {
-                System.out.println(this.getSectionTableOfContents(section));
-            }
-            catch (IllegalArgumentException e){
-                System.err.println("No such section.");
-                return;
-            }
-        }
-    }
-
-    private void interpretShowSection(JSAPResult parsingResults) {
-        String sectionNumber = parsingResults.getString("section");
-        String chapterNumber = parsingResults.getString("chapter");
-        if (sectionNumber == null){
-            interpretShowArticleRange(parsingResults);
-        }
-        else if (chapterNumber == null){
-            try {
-                System.out.println(this.getSectionContent(sectionNumber));
-            }
-            catch(IllegalArgumentException e){
-                System.err.println("No such section.");
-            }
-        }
-        else {
-            try {
-                System.out.println(this.getChapterContent(sectionNumber, chapterNumber));
-            }
-            catch(IllegalArgumentException e){
-                System.err.println("No such section or chapter.");
-            }
-        }
-    }
-
-    protected void showArticleSpecifics(JSAPResult parsingResults){
-        List<String> specifics = correctSpecifics(Arrays.asList(parsingResults.getStringArray("articleSpecifics")));
-        String articleNumber = getArticleSpecific(specifics);
-        String paragraphNumber = getParagraphSpecific(specifics);
-        String pointNumber = getPointSpecific(specifics);
-        String letterNumber = getLetterSpecific(specifics);
-
-        if (articleNumber == null){
-            System.err.println("Article number required.");
-            return;
-        }
-
-        showLetter(letterNumber, pointNumber, paragraphNumber, articleNumber);
-    }
-
-    protected void showLetter(String letterNumber, String pointNumber, String paragraphNumber, String articleNumber){
-        if (letterNumber != null && pointNumber != null && paragraphNumber != null && articleNumber != null){
-            try {
-                System.out.println(getLetter(articleNumber, paragraphNumber, pointNumber, letterNumber));
-            }
-            catch (IllegalArgumentException e){
-                System.err.println("No such letter.");
-                return;
-            }
-        }
-        else {
-            showPoint(pointNumber, paragraphNumber, articleNumber);
-        }
-    }
-
     public ConsumersBillDocumentSystem(String filepath) throws IOException {
         super();
         readDocument(filepath);
@@ -101,7 +23,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         parser.parseDocument(billDocument);
     }
 
-    public ConsumersBillDocumentSystem(List<String> fileLines){
+    public ConsumersBillDocumentSystem(List<String> fileLines) {
         super();
         fillCleanerRules();
         fillConsumersParser();
@@ -111,14 +33,83 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         parser.parseDocument(billDocument);
     }
 
-    private void fillCleanerRules(){
+    public void interpret(JSAPResult parsingResults) {
+        boolean showTableOfContents = parsingResults.getBoolean("showTableOfContents");
+        if (showTableOfContents) {
+            interpretTableOfContents(parsingResults);
+        } else {
+            interpretShowSection(parsingResults);
+        }
+    }
+
+    private void interpretTableOfContents(JSAPResult parsingResults) {
+        String section = parsingResults.getString("section");
+        if (section == null) {
+            System.out.println(this.getTableOfContents());
+        } else {
+            try {
+                System.out.println(this.getSectionTableOfContents(section));
+            } catch (IllegalArgumentException e) {
+                System.err.println("No such section.");
+            }
+        }
+    }
+
+    private void interpretShowSection(JSAPResult parsingResults) {
+        String sectionNumber = parsingResults.getString("section");
+        String chapterNumber = parsingResults.getString("chapter");
+        if (sectionNumber == null) {
+            interpretShowArticleRange(parsingResults);
+        } else if (chapterNumber == null) {
+            try {
+                System.out.println(this.getSectionContent(sectionNumber));
+            } catch (IllegalArgumentException e) {
+                System.err.println("No such section.");
+            }
+        } else {
+            try {
+                System.out.println(this.getChapterContent(sectionNumber, chapterNumber));
+            } catch (IllegalArgumentException e) {
+                System.err.println("No such section or chapter.");
+            }
+        }
+    }
+
+    protected void showArticleSpecifics(JSAPResult parsingResults) {
+        List<String> specifics = correctSpecifics(Arrays.asList(parsingResults.getStringArray("articleSpecifics")));
+        String articleNumber = getArticleSpecific(specifics);
+        String paragraphNumber = getParagraphSpecific(specifics);
+        String pointNumber = getPointSpecific(specifics);
+        String letterNumber = getLetterSpecific(specifics);
+
+        if (articleNumber == null) {
+            System.err.println("Article number required.");
+            return;
+        }
+
+        showLetter(letterNumber, pointNumber, paragraphNumber, articleNumber);
+    }
+
+    protected void showLetter(String letterNumber, String pointNumber, String paragraphNumber, String articleNumber) {
+        if (letterNumber != null && pointNumber != null && paragraphNumber != null && articleNumber != null) {
+            try {
+                System.out.println(getLetter(articleNumber, paragraphNumber, pointNumber, letterNumber));
+            } catch (IllegalArgumentException e) {
+                System.err.println("No such letter.");
+            }
+        } else {
+            showPoint(pointNumber, paragraphNumber, articleNumber);
+        }
+    }
+
+    private void fillCleanerRules() {
         cleaner.addNewCleanRule(new CleanerRule("(?m)^©Kancelaria Sejmu", CleanerRuleType.DeleteLineWithPhrase));
         cleaner.addNewCleanRule(new CleanerRule("(?m)^[0-9]{4}-[0-9]{2}-[0-9]{2}$", CleanerRuleType.DeleteLineWithPhrase));
         cleaner.addNewCleanRule(new CleanerRule("(?m)^[a-zA-Z]$", CleanerRuleType.DeleteLineWithPhrase));
         cleaner.addNewCleanRule(new CleanerRule("(?m)^[0-9]$", CleanerRuleType.DeleteLineWithPhrase));
     }
 
-    private void fillConsumersParser(){
+    private void fillConsumersParser() {
         ParserRule litera = new ParserRule("((?m)^[a-z]{3}\\))|((?m)^[a-z]{2}\\))|((?m)^[a-z]{1}\\))", ParserRuleType.Unlimited);
         ParserRule punkt = new ParserRule("((?m)^[0-9]{3}[a-z]{1}\\))|((?m)^[0-9]{3}\\))" +
                 "|((?m)^[0-9]{2}[a-z]{1}\\))|((?m)^[0-9]{2}\\))" +
@@ -154,9 +145,9 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         parser.addParserRule(dzial);
     }
 
-    public String getTableOfContents(){
+    public String getTableOfContents() {
         BillFragment fragment = billDocument.getBillFragment();
-        if (fragment == null){
+        if (fragment == null) {
             throw new IllegalStateException("Document hasn't been parsed, yet.");
         }
 
@@ -165,51 +156,48 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         return appendList(fragment.getTableOfContentsWithEndingPredicateAndContentPredicate(2, terminalPredicate, contentPredicate));
     }
 
-    public BillFragment getSection(String sectionNumber){
+    public BillFragment getSection(String sectionNumber) {
         String sectionIdentifier = "DZIAŁ " + getRomanNumber(sectionNumber);
 
         BillFragment section = billDocument.getBillFragment().findFirstFragmentWithIdentifier(sectionIdentifier);
-        if (section == null){
+        if (section == null) {
             throw new IllegalArgumentException("Couldn't find: " + sectionIdentifier);
         }
 
         return section;
     }
 
-    public List<BillFragment> getSectionsInRange(String rangeStart, String rangeEnd){
+    public List<BillFragment> getSectionsInRange(String rangeStart, String rangeEnd) {
         String rangeStartIdentifier = "DZIAŁ " + getRomanNumber(rangeStart);
         String rangeEndIdentifier = "DZIAŁ " + getRomanNumber(rangeEnd);
 
         Predicate<BillFragment> sectionPredicate = (x) -> x.getIdentifier() != null && x.getIdentifier().contains("DZIAŁ ");
 
-        List<BillFragment> sections = getPartsInRange(billDocument.getBillFragment(), sectionPredicate, rangeStartIdentifier, rangeEndIdentifier);
-        return sections;
+        return getPartsInRange(billDocument.getBillFragment(), sectionPredicate, rangeStartIdentifier, rangeEndIdentifier);
     }
 
-    public BillFragment getChapter(String sectionNumber, String chapterNumber){
+    public BillFragment getChapter(String sectionNumber, String chapterNumber) {
         BillFragment section;
         try {
             section = getSection(sectionNumber);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Couldn't find section. " + e);
         }
         String chapterIdentifier = "Rozdział " + chapterNumber;
 
         BillFragment chapter = section.findFirstFragmentWithIdentifier(chapterIdentifier);
-        if (chapter == null){
+        if (chapter == null) {
             throw new IllegalArgumentException("Couldn't find: " + chapterIdentifier);
         }
 
         return chapter;
     }
 
-    public List<BillFragment> getChaptersInRange(String sectionNumber, String rangeStart, String rangeEnd){
+    public List<BillFragment> getChaptersInRange(String sectionNumber, String rangeStart, String rangeEnd) {
         BillFragment section;
         try {
             section = getSection(sectionNumber);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Couldn't find section. " + e);
         }
         String rangeStartIdentifier = "Rozdział " + rangeStart;
@@ -217,45 +205,44 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
 
         Predicate<BillFragment> chapterPredicate = (x) -> x.getIdentifier() != null && x.getIdentifier().contains("Rozdział ");
 
-        List<BillFragment> sections = getPartsInRange(billDocument.getBillFragment(), chapterPredicate, rangeStartIdentifier, rangeEndIdentifier);
-        return sections;
+        return getPartsInRange(section, chapterPredicate, rangeStartIdentifier, rangeEndIdentifier);
     }
 
-    public BillFragment getLetter(String articleNumber, String paragraphNumber, String pointNumber, String letterNumber){
-        BillFragment point = getPoint(articleNumber, paragraphNumber, pointNumber);
-
-        String letterIdentifier = letterNumber + ")";
-        BillFragment letter = point.findFirstFragmentWithIdentifier(letterIdentifier);
-        if (point == null){
-            throw new IllegalArgumentException("Couldn't find: " + letterIdentifier);
-        }
-
-        return letter;
-    }
-
-    public List<BillFragment> getLetterInRange(String articleNumber, String paragraphNumber, String pointNumber, String rangeStart, String rangeEnd){
+    public BillFragment getLetter(String articleNumber, String paragraphNumber, String pointNumber, String letterNumber) {
         BillFragment point;
         try {
             point = getPoint(articleNumber, paragraphNumber, pointNumber);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Couldn't find point: " + e);
         }
-        catch (IllegalArgumentException e){
+        String letterIdentifier = letterNumber + ")";
+        BillFragment letter = point.findFirstFragmentWithIdentifier(letterIdentifier);
+        if (letter == null) {
+            throw new IllegalArgumentException("Couldn't find: " + letterIdentifier);
+        }
+        return letter;
+    }
+
+    public List<BillFragment> getLetterInRange(String articleNumber, String paragraphNumber, String pointNumber, String rangeStart, String rangeEnd) {
+        BillFragment point;
+        try {
+            point = getPoint(articleNumber, paragraphNumber, pointNumber);
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Couldn't find section. " + e);
         }
-        String rangeStartIdentifier =  rangeStart + ")";
+        String rangeStartIdentifier = rangeStart + ")";
         String rangeEndIdentifier = rangeEnd + ")";
 
         Predicate<BillFragment> letterPredicate = (x) -> x.getIdentifier() != null && x.getIdentifier().matches("[a-z]+\\)");
 
-        List<BillFragment> letter = getPartsInRange(point, letterPredicate, rangeStartIdentifier, rangeEndIdentifier);
-        return letter;
+        return getPartsInRange(point, letterPredicate, rangeStartIdentifier, rangeEndIdentifier);
     }
 
-    public String getSectionTableOfContents(String sectionNumber){
+    public String getSectionTableOfContents(String sectionNumber) {
         BillFragment section;
         try {
             section = getSection(sectionNumber);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Couldn't get table of contents.");
         }
 
@@ -268,8 +255,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         BillFragment section;
         try {
             section = getSection(sectionNumber);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Couldn't get content. " + e);
         }
 
@@ -280,8 +266,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
         BillFragment chapter;
         try {
             chapter = getChapter(sectionNumber, chapterNumber);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Couldn't get content. " + e);
         }
 

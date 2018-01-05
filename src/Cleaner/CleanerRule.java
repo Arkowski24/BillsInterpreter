@@ -6,7 +6,7 @@ public class CleanerRule {
     public final Pattern regexPattern;
     public final CleanerRuleType cleanerRuleType;
 
-    public CleanerRule(String cleanerRulePattern, CleanerRuleType cleanerRuleType){
+    public CleanerRule(String cleanerRulePattern, CleanerRuleType cleanerRuleType) {
         this.regexPattern = Pattern.compile(cleanerRulePattern);
         this.cleanerRuleType = cleanerRuleType;
     }
@@ -18,8 +18,7 @@ public class CleanerRule {
 
         CleanerRule that = (CleanerRule) o;
 
-        if (!regexPattern.equals(that.regexPattern)) return false;
-        return cleanerRuleType == that.cleanerRuleType;
+        return regexPattern.equals(that.regexPattern) && cleanerRuleType == that.cleanerRuleType;
     }
 
     @Override

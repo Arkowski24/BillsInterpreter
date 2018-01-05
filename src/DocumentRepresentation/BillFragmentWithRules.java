@@ -1,6 +1,5 @@
 package DocumentRepresentation;
 
-import DocumentRepresentation.BillFragment;
 import Parser.ParserRule;
 
 import java.util.List;

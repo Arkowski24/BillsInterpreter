@@ -1,66 +1,20 @@
 package DocumentSystem;
 
-import Cleaner.*;
-import DocumentRepresentation.*;
-import Parser.*;
+import Cleaner.CleanerRule;
+import Cleaner.CleanerRuleType;
+import DocumentRepresentation.BillFragment;
+import Parser.ParserRule;
+import Parser.ParserRuleType;
 import com.martiansoftware.jsap.JSAPResult;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class ConstitutionDocumentSystem extends PolishDocumentSystem {
-    public void interpret(JSAPResult parsingResults){
-        boolean showTableOfContents = parsingResults.getBoolean("showTableOfContents");
-        if (showTableOfContents){
-            interpretTableOfContents(parsingResults);
-        }
-        else {
-            interpretShowChapter(parsingResults);
-        }
-    }
-
-    private void interpretTableOfContents(JSAPResult parsingResults){
-        String chapter = parsingResults.getString("chapter");
-        if (chapter == null){
-            System.out.println(this.getTableOfContents());
-        }
-        else {
-            try {
-                System.out.println(this.getChapterTableOfContents(chapter));
-            }
-            catch (IllegalArgumentException e){
-                System.err.println("No such chapter.");
-                return;
-            }
-        }
-    }
-
-    private void interpretShowChapter(JSAPResult parsingResults) {
-        String chapterNumber = parsingResults.getString("chapter");
-        if (chapterNumber == null){
-            interpretShowArticleRange(parsingResults);
-        }
-        else System.out.println(this.getChapterContent(chapterNumber));
-    }
-
-    protected void showArticleSpecifics(JSAPResult parsingResults){
-        List<String> specifics = correctSpecifics(Arrays.asList(parsingResults.getStringArray("articleSpecifics")));
-        String articleNumber = getArticleSpecific(specifics);
-        String paragraphNumber = getParagraphSpecific(specifics);
-        String pointNumber = getPointSpecific(specifics);
-
-        if (articleNumber == null){
-            System.err.println("Article number required.");
-            return;
-        }
-
-        showPoint(pointNumber, paragraphNumber, articleNumber);
-    }
-
-    public ConstitutionDocumentSystem(String filepath) throws  IOException{
+    public ConstitutionDocumentSystem(String filepath) throws IOException {
         super();
         fillCleanerRules();
         fillConstitutionParser();
@@ -71,7 +25,7 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         fixPreamble();
     }
 
-    public ConstitutionDocumentSystem(List<String> fileLines){
+    public ConstitutionDocumentSystem(List<String> fileLines) {
         super();
         fillCleanerRules();
         fillConstitutionParser();
@@ -82,14 +36,57 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         fixPreamble();
     }
 
-    private void fillCleanerRules(){
+    public void interpret(JSAPResult parsingResults) {
+        boolean showTableOfContents = parsingResults.getBoolean("showTableOfContents");
+        if (showTableOfContents) {
+            interpretTableOfContents(parsingResults);
+        } else {
+            interpretShowChapter(parsingResults);
+        }
+    }
+
+    private void interpretTableOfContents(JSAPResult parsingResults) {
+        String chapter = parsingResults.getString("chapter");
+        if (chapter == null) {
+            System.out.println(this.getTableOfContents());
+        } else {
+            try {
+                System.out.println(this.getChapterTableOfContents(chapter));
+            } catch (IllegalArgumentException e) {
+                System.err.println("No such chapter.");
+            }
+        }
+    }
+
+    private void interpretShowChapter(JSAPResult parsingResults) {
+        String chapterNumber = parsingResults.getString("chapter");
+        if (chapterNumber == null) {
+            interpretShowArticleRange(parsingResults);
+        } else System.out.println(this.getChapterContent(chapterNumber));
+    }
+
+    protected void showArticleSpecifics(JSAPResult parsingResults) {
+        List<String> specifics = correctSpecifics(Arrays.asList(parsingResults.getStringArray("articleSpecifics")));
+        String articleNumber = getArticleSpecific(specifics);
+        String paragraphNumber = getParagraphSpecific(specifics);
+        String pointNumber = getPointSpecific(specifics);
+
+        if (articleNumber == null) {
+            System.err.println("Article number required.");
+            return;
+        }
+
+        showPoint(pointNumber, paragraphNumber, articleNumber);
+    }
+
+    private void fillCleanerRules() {
         cleaner.addNewCleanRule(new CleanerRule("^[0-9]{4}-[0-9]{2}-[0-9]{2}$", CleanerRuleType.DeleteLineWithPhrase));
         cleaner.addNewCleanRule(new CleanerRule("©Kancelaria Sejmu", CleanerRuleType.DeleteLineWithPhrase));
         cleaner.addNewCleanRule(new CleanerRule("^[a-zA-Z]$", CleanerRuleType.DeleteLineWithPhrase));
         cleaner.addNewCleanRule(new CleanerRule("^[0-9]$", CleanerRuleType.DeleteLineWithPhrase));
     }
 
-    private void fillConstitutionParser(){
+    private void fillConstitutionParser() {
         ParserRule punkt = new ParserRule("((?m)^[0-9a-z]{3}\\))|((?m)^[0-9a-z]{2}\\))|((?m)^[0-9a-z]{1}\\))", ParserRuleType.Unlimited);
         ParserRule punkt2 = new ParserRule("((?m)^[0-9a-z]{3}\\))|((?m)^[0-9a-z]{2}\\))|((?m)^[0-9a-z]{1}\\))", ParserRuleType.NoMatch);
         ParserRule ustep = new ParserRule("((?m)^[0-9]{3}[a-z]{1}\\.)|((?m)^[0-9]{3}\\.)" +
@@ -111,33 +108,30 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         parser.addParserRule(rozdzial);
     }
 
-    private void fixPreamble(){
+    private void fixPreamble() {
         BillFragment preamble = billDocument.getBillFragment().findFirstFragmentWithIdentifier("z dnia 2 kwietnia 1997 r.");
-        if (preamble == null){
-            return;
-        }
-        else {
+        if (preamble != null) {
             preamble.setIdentifier("Preambuła");
         }
     }
 
     @Override
-    public String getTableOfContents(){
+    public String getTableOfContents() {
         BillFragment fragment = billDocument.getBillFragment();
-        if (fragment == null){
+        if (fragment == null) {
             throw new IllegalStateException("Document hasn't been parsed, yet.");
         }
 
         Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() == null || x.getIdentifier().matches("[\\WA-Z]+") || x.getIdentifier().contains("Rozdział"));
-        Predicate<String> contentPredicate = (String x) -> x != null && x.replaceAll(".", "").length() == 0;
+        Predicate<String> contentPredicate = Objects::nonNull;
         return appendList(fragment.getTableOfContentsWithEndingPredicateAndContentPredicate(2, terminalPredicate, contentPredicate));
     }
 
-    private BillFragment getChapter(String chapterNumber){
+    private BillFragment getChapter(String chapterNumber) {
         String chapterIdentifier = "Rozdział " + getRomanNumber(chapterNumber);
 
         BillFragment chapter = billDocument.getBillFragment().findFirstFragmentWithIdentifier(chapterIdentifier);
-        if (chapter == null){
+        if (chapter == null) {
             throw new IllegalArgumentException("Couldn't find: " + chapterIdentifier);
         }
 
@@ -148,24 +142,22 @@ public class ConstitutionDocumentSystem extends PolishDocumentSystem {
         BillFragment chapter;
         try {
             chapter = getChapter(chapterNumber);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Couldn't get content. " + e);
         }
 
         return chapter.getFragmentContentWithChildren();
     }
 
-    public String getChapterTableOfContents(String chapterNumber){
+    public String getChapterTableOfContents(String chapterNumber) {
         BillFragment chapter;
         try {
             chapter = getChapter(chapterNumber);
-        }
-        catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Couldn't get table of contents. " + e);
         }
         Predicate<BillFragment> terminalPredicate = (BillFragment x) -> (x.getIdentifier() != null && (x.getIdentifier().matches("[A-Z\\W]+") || x.getIdentifier().contains("Rozdział")));
-        Predicate<String> contentPredicate = (String x) -> x != null && x.replaceAll(".", "").length() == 0;
+        Predicate<String> contentPredicate = Objects::nonNull;
         return appendList(chapter.getTableOfContentsWithEndingPredicateAndContentPredicate(2, terminalPredicate, contentPredicate));
     }
 }

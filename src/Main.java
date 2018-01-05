@@ -1,4 +1,3 @@
-import DocumentRepresentation.BillDocument;
 import DocumentSystem.AbstractDocumentSystem;
 import DocumentSystem.ConstitutionDocumentSystem;
 import DocumentSystem.ConsumersBillDocumentSystem;
@@ -7,24 +6,21 @@ import com.martiansoftware.jsap.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.jar.JarException;
 
 public class Main {
 
     public static void main(String[] args) {
         JSAP jsap = new JSAP();
         JSAPResult results;
-        try{
+        try {
             fillOptionsForJsapParser(jsap);
-        }
-        catch (JSAPException e){
+        } catch (JSAPException e) {
             System.err.println("Couldn't add options to parser.");
             return;
         }
         try {
             results = jsap.parse(args);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.err.println("Couldn't parse given options.");
             System.err.println();
             System.err.println(jsap.getUsage());
@@ -32,7 +28,7 @@ public class Main {
             System.err.println(jsap.getHelp());
             return;
         }
-        if (results.getBoolean("showHelp")){
+        if (results.getBoolean("showHelp")) {
             System.out.println();
             System.out.println(jsap.getUsage());
             System.out.println();
@@ -40,19 +36,18 @@ public class Main {
             return;
         }
         String filePath = results.getString("filepath");
-        if (filePath == null){
+        if (filePath == null) {
             System.err.println("No file path specified.");
             return;
         }
         List<String> fileLines;
         try {
             fileLines = AbstractDocumentSystem.readFile(filePath);
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             System.err.println("Couldn't read file.");
             return;
         }
-        switch (PolishDocumentSystem.checkDocumentType(fileLines)){
+        switch (PolishDocumentSystem.checkDocumentType(fileLines)) {
             case Constitution:
                 interpretConstitution(fileLines, results);
                 break;
@@ -63,7 +58,7 @@ public class Main {
         }
     }
 
-    private static void fillOptionsForJsapParser(JSAP parser) throws JSAPException{
+    private static void fillOptionsForJsapParser(JSAP parser) throws JSAPException {
         Switch helpOption = new Switch("showHelp")
                 .setShortFlag('h')
                 .setLongFlag("help");
@@ -77,8 +72,8 @@ public class Main {
         fileOption.setHelp("Open file specified by given filepath. The type of document (Constitution|Bill) is detected automatically.");
 
         Switch modeOption = new Switch("showTableOfContents")
-                                .setShortFlag('T')
-                                .setLongFlag("table-of-contents");
+                .setShortFlag('T')
+                .setLongFlag("table-of-contents");
 
         modeOption.setHelp("Specify whether the program should display table of content instead of bill's content. If section is specified it's table of contents will be displayed instead.");
 
@@ -98,14 +93,14 @@ public class Main {
 
         articlesOption.setHelp("Show articles within specified ranges. Two consecutive numbers create range. If the number of articles is odd, the last one is ignored.");
 
-        FlaggedOption chapterOption  = new FlaggedOption("chapter")
+        FlaggedOption chapterOption = new FlaggedOption("chapter")
                 .setStringParser(JSAP.STRING_PARSER)
                 .setShortFlag('c')
                 .setLongFlag("chapter");
 
         chapterOption.setHelp("Show chapter with specified number. For Bill type document section number is also required.");
 
-        FlaggedOption sectionOption  = new FlaggedOption("section")
+        FlaggedOption sectionOption = new FlaggedOption("section")
                 .setStringParser(JSAP.STRING_PARSER)
                 .setShortFlag('s')
                 .setLongFlag("section");
@@ -113,7 +108,7 @@ public class Main {
         sectionOption.setHelp("Show section with specified number.");
 
         UnflaggedOption showSpecific = new UnflaggedOption("articleSpecifics")
-                                            .setGreedy(true);
+                .setGreedy(true);
 
         showSpecific.setHelp("Show specified part of article. Only the first valid rule for each element (article, paragraph, etc.) is considered.");
 
@@ -126,18 +121,17 @@ public class Main {
             parser.registerParameter(chapterOption);
             parser.registerParameter(sectionOption);
             parser.registerParameter(showSpecific);
-        }
-        catch (JSAPException e){
+        } catch (JSAPException e) {
             throw new JSAPException("Couldn't add options.");
         }
     }
 
-    private static void interpretConstitution(List<String> fileLines, JSAPResult parsingResults){
+    private static void interpretConstitution(List<String> fileLines, JSAPResult parsingResults) {
         ConstitutionDocumentSystem constitutionDocumentSystem = new ConstitutionDocumentSystem(fileLines);
         constitutionDocumentSystem.interpret(parsingResults);
     }
 
-    private static void interpretBill(List<String> fileLines, JSAPResult parsingResults){
+    private static void interpretBill(List<String> fileLines, JSAPResult parsingResults) {
         ConsumersBillDocumentSystem consumersBillDocumentSystem = new ConsumersBillDocumentSystem(fileLines);
         consumersBillDocumentSystem.interpret(parsingResults);
     }
