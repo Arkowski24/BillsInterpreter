@@ -1,7 +1,7 @@
-package DocumentSystem;
+package com.farald.DocumentSystem;
 
-import DocumentRepresentation.BillFragment;
-import DocumentRepresentation.DocumentType;
+import com.farald.DocumentRepresentation.BillFragment;
+import com.farald.DocumentRepresentation.DocumentType;
 import com.martiansoftware.jsap.JSAPResult;
 
 import java.util.ArrayList;

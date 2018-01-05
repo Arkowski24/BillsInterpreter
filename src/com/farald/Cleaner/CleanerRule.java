@@ -1,4 +1,4 @@
-package Cleaner;
+package com.farald.Cleaner;
 
 import java.util.regex.Pattern;
 

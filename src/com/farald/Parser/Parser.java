@@ -1,8 +1,8 @@
-package Parser;
+package com.farald.Parser;
 
-import DocumentRepresentation.BillDocument;
-import DocumentRepresentation.BillFragment;
-import DocumentRepresentation.BillFragmentWithRules;
+import com.farald.DocumentRepresentation.BillDocument;
+import com.farald.DocumentRepresentation.BillFragment;
+import com.farald.DocumentRepresentation.BillFragmentWithRules;
 
 import java.util.ArrayList;
 import java.util.List;

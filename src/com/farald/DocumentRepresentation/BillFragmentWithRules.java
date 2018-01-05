@@ -1,6 +1,6 @@
-package DocumentRepresentation;
+package com.farald.DocumentRepresentation;
 
-import Parser.ParserRule;
+import com.farald.Parser.ParserRule;
 
 import java.util.List;
 

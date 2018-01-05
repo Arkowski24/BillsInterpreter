@@ -1,10 +1,10 @@
-package DocumentSystem;
+package com.farald.DocumentSystem;
 
-import Cleaner.CleanerRule;
-import Cleaner.CleanerRuleType;
-import DocumentRepresentation.BillFragment;
-import Parser.ParserRule;
-import Parser.ParserRuleType;
+import com.farald.Cleaner.CleanerRule;
+import com.farald.Cleaner.CleanerRuleType;
+import com.farald.DocumentRepresentation.BillFragment;
+import com.farald.Parser.ParserRule;
+import com.farald.Parser.ParserRuleType;
 import com.martiansoftware.jsap.JSAPResult;
 
 import java.io.IOException;

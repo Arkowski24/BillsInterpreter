@@ -1,4 +1,4 @@
-package Cleaner;
+package com.farald.Cleaner;
 
 public enum CleanerRuleType {
     DeleteLineWithPhrase, DeletePhrase

@@ -1,7 +1,9 @@
-import DocumentSystem.AbstractDocumentSystem;
-import DocumentSystem.ConstitutionDocumentSystem;
-import DocumentSystem.ConsumersBillDocumentSystem;
-import DocumentSystem.PolishDocumentSystem;
+package com.farald;
+
+import com.farald.DocumentSystem.AbstractDocumentSystem;
+import com.farald.DocumentSystem.ConstitutionDocumentSystem;
+import com.farald.DocumentSystem.ConsumersBillDocumentSystem;
+import com.farald.DocumentSystem.PolishDocumentSystem;
 import com.martiansoftware.jsap.*;
 
 import java.io.IOException;

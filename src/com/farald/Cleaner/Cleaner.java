@@ -1,6 +1,6 @@
-package Cleaner;
+package com.farald.Cleaner;
 
-import DocumentRepresentation.BillDocument;
+import com.farald.DocumentRepresentation.BillDocument;
 
 import java.util.ArrayList;
 import java.util.List;

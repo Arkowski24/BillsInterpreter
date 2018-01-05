@@ -1,4 +1,4 @@
-package DocumentRepresentation;
+package com.farald.DocumentRepresentation;
 
 import java.util.ArrayList;
 import java.util.Arrays;

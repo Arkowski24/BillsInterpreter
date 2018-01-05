@@ -1,4 +1,4 @@
-package Parser;
+package com.farald.Parser;
 
 import java.util.regex.Matcher;
 

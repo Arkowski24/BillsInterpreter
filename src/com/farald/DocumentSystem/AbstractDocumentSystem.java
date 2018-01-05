@@ -1,9 +1,9 @@
-package DocumentSystem;
+package com.farald.DocumentSystem;
 
-import Cleaner.Cleaner;
-import DocumentRepresentation.BillDocument;
-import DocumentRepresentation.BillFragment;
-import Parser.Parser;
+import com.farald.Cleaner.Cleaner;
+import com.farald.DocumentRepresentation.BillDocument;
+import com.farald.DocumentRepresentation.BillFragment;
+import com.farald.Parser.Parser;
 import com.frequal.romannumerals.Converter;
 import com.martiansoftware.jsap.JSAPResult;
 
