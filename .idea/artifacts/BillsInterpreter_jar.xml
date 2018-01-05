@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="BillsInterpreter:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BillsInterpreter_jar</output-path>
+    <root id="archive" name="BillsInterpreter.jar">
+      <element id="module-output" name="BillsInterpreter" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/roman-numerals-1.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/JSAP-2.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
