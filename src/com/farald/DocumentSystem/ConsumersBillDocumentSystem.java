@@ -168,7 +168,7 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
     }
 
     public BillFragment getSection(String sectionNumber) {
-        String sectionIdentifier = "DZIAŁ " + getRomanNumber(sectionNumber);
+        String sectionIdentifier = "DZIAŁ " + getRomanNumber(sectionNumber).toUpperCase();
 
         BillFragment section = billDocument.getBillFragment().findFirstFragmentWithIdentifier(sectionIdentifier);
         if (section == null) {
@@ -179,8 +179,8 @@ public class ConsumersBillDocumentSystem extends PolishDocumentSystem {
     }
 
     public List<BillFragment> getSectionsInRange(String rangeStart, String rangeEnd) {
-        String rangeStartIdentifier = "DZIAŁ " + getRomanNumber(rangeStart);
-        String rangeEndIdentifier = "DZIAŁ " + getRomanNumber(rangeEnd);
+        String rangeStartIdentifier = "DZIAŁ " + getRomanNumber(rangeStart).toUpperCase();
+        String rangeEndIdentifier = "DZIAŁ " + getRomanNumber(rangeEnd).toUpperCase();
 
         Predicate<BillFragment> sectionPredicate = (x) -> x.getIdentifier() != null && x.getIdentifier().contains("DZIAŁ ");
 

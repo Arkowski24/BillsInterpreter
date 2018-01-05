@@ -141,7 +141,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
 
     protected String getArticleSpecific(List<String> specifics) {
         for (String specific : specifics) {
-            if (specific.matches("^art[0-9]+")) {
+            if (specific.matches("^art[0-9a-z]+")) {
                 return specific.substring(3);
             }
         }
@@ -150,7 +150,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
 
     protected String getParagraphSpecific(List<String> specifics) {
         for (String specific : specifics) {
-            if (specific.matches("^ust[0-9]+")) {
+            if (specific.matches("^ust[0-9a-z]+")) {
                 return specific.substring(3);
             }
         }
@@ -159,7 +159,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
 
     protected String getPointSpecific(List<String> specifics) {
         for (String specific : specifics) {
-            if (specific.matches("^pkt[0-9]+")) {
+            if (specific.matches("^pkt[0-9a-z]+")) {
                 return specific.substring(3);
             }
         }
@@ -168,7 +168,7 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
 
     protected String getLetterSpecific(List<String> specifics) {
         for (String specific : specifics) {
-            if (specific.matches("^lit[a-z]+")) {
+            if (specific.matches("^lit[0-9a-z]+")) {
                 return specific.substring(3);
             }
         }
@@ -251,6 +251,9 @@ public abstract class PolishDocumentSystem extends AbstractDocumentSystem {
             point = getPartWithIdentifier(article, pointIdentifier);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Couldn't retrieve point: " + e);
+        }
+        if(point.getParent() != article){
+            throw new IllegalArgumentException("Point is not direct descendant");
         }
         return point;
     }
