@@ -8,7 +8,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="JSAP-2.1" level="project" />
-    <orderEntry type="library" name="roman-numerals-1.3" level="project" />
+    <orderEntry type="library" exported="" name="JSAP-2.1" level="project" />
+    <orderEntry type="library" exported="" name="roman-numerals-1.3" level="project" />
   </component>
 </module>
